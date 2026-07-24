@@ -1,0 +1,5 @@
+{
+  "crons": [
+    { "path": "/api/scan?secret=REPLACE_WITH_YOUR_CRON_SECRET", "schedule": "0 13 * * *" }
+  ]
+}
