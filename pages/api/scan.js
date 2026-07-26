@@ -18,7 +18,20 @@ export default async function handler(req, res) {
   );
 
   const admin = supabaseAdmin();
-  const { data: guardRows, error } = await admin.from('guard_settings').select('*');
+  const { data: approvedProfiles, error: profErr } = await admin
+    .from('profiles')
+    .select('id')
+    .eq('approved', true);
+  if (profErr) return res.status(500).json({ error: profErr.message });
+  const approvedIds = (approvedProfiles || []).map((p) => p.id);
+  if (!approvedIds.length) {
+    return res.status(200).json({ ok: true, usersScanned: 0, notificationsSent: 0 });
+  }
+
+  const { data: guardRows, error } = await admin
+    .from('guard_settings')
+    .select('*')
+    .in('user_id', approvedIds);
   if (error) return res.status(500).json({ error: error.message });
 
   let notified = 0;

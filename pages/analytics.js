@@ -20,7 +20,7 @@ export default function Analytics() {
   const tradingDays = new Set(trades.map(t => t.trade_date)).size;
 
   return (
-    <Layout activeAccountName={data.activeAccount?.name} accountCount={data.accounts.length}>
+    <Layout activeAccountName={data.activeAccount?.name} accountCount={data.accounts.length} isAdmin={data.profile?.isAdmin}>
       <section className="page">
         <div className="page-head">
           <div><h1>{t('analyticsTitle')}</h1><p>{t('analyticsSub')}</p></div>

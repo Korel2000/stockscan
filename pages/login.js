@@ -5,6 +5,7 @@ import { useLanguage } from '../lib/i18n';
 
 const OAUTH_PROVIDERS = [
   { id: 'google', label: 'Google', color: '#fff', bg: '#fff', textColor: '#111' },
+  { id: 'facebook', label: 'Facebook', color: '#fff', bg: '#1877F2', textColor: '#fff' },
   { id: 'twitter', label: 'X / Twitter', color: '#fff', bg: '#000', textColor: '#fff' }
 ];
 
@@ -56,7 +57,7 @@ export default function Login() {
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
           <div className="logo" style={{ width: 56, height: 56, borderRadius: 16, margin: '0 auto 14px', fontSize: 24 }}>S</div>
           <h1 style={{ color: 'var(--blue)', fontSize: 26, margin: '0 0 4px' }}>StockScan</h1>
-          <p style={{ color: 'var(--text-dim)', margin: 0 }}>Smart Trading Journal</p>
+          <p style={{ color: 'var(--text-dim)', margin: 0 }}>{t('tagline')}</p>
         </div>
         <div className="panel">
           <h2 style={{ textAlign: 'center', fontSize: 22 }}>{mode === 'signin' ? t('signInTitle') : t('signUpTitle')}</h2>

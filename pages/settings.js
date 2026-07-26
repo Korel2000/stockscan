@@ -48,7 +48,7 @@ export default function Settings() {
   }
 
   return (
-    <Layout activeAccountName={data.activeAccount?.name} accountCount={data.accounts.length}>
+    <Layout activeAccountName={data.activeAccount?.name} accountCount={data.accounts.length} isAdmin={data.profile?.isAdmin}>
       <section className="page">
         <div className="page-head"><div><h1>{t('settingsTitle')}</h1><p>{t('settingsSub')}</p></div></div>
 
@@ -64,18 +64,18 @@ export default function Settings() {
         <div className="panel">
           <h2 style={{ textAlign: 'end' }}>{t('traderGuard')}</h2>
           <p className="hint" style={{ textAlign: 'end' }}>הגדר את מגבלות ניהול הסיכון. תקבל התראות כשמגיעים לסף.</p>
-          <Slider label="Loss Streak Limit" value={guardForm.loss_streak_limit} min={1} max={10}
+          <Slider label={t('lossStreakLimit')} value={guardForm.loss_streak_limit} min={1} max={10}
             onChange={(v) => setGuardForm({ ...guardForm, loss_streak_limit: v })}
-            desc="Alert after this many consecutive losing trades" />
-          <Slider label="Max Trades Per Day" value={guardForm.max_trades_per_day} min={1} max={30}
+            desc={t('lossStreakDesc')} />
+          <Slider label={t('maxTradesPerDay')} value={guardForm.max_trades_per_day} min={1} max={30}
             onChange={(v) => setGuardForm({ ...guardForm, max_trades_per_day: v })}
-            desc="Maximum number of trades allowed per day" />
-          <Slider label="($) Daily Loss Limit" value={guardForm.daily_loss_limit} min={10} max={2000} step={10}
+            desc={t('maxTradesDesc')} />
+          <Slider label={t('dailyLossLimit')} value={guardForm.daily_loss_limit} min={10} max={2000} step={10}
             onChange={(v) => setGuardForm({ ...guardForm, daily_loss_limit: v })}
-            desc="Alert when daily losses exceed this amount" />
-          <Slider label="($) Daily Profit Target" value={guardForm.daily_profit_target} min={10} max={5000} step={10}
+            desc={t('dailyLossDesc')} />
+          <Slider label={t('dailyProfitTarget')} value={guardForm.daily_profit_target} min={10} max={5000} step={10}
             onChange={(v) => setGuardForm({ ...guardForm, daily_profit_target: v })}
-            desc="Your daily profit goal (for tracking purposes)" />
+            desc={t('dailyProfitDesc')} />
           <div className="modal-actions">
             <button className="btn btn-primary" onClick={saveGuard}>{t('saveChanges')}</button>
             <button className="btn btn-ghost" onClick={() => setGuardForm(data.guard)}>{t('reset')}</button>
@@ -89,7 +89,7 @@ export default function Settings() {
             <div key={a.id} className="account-card">
               <span className="del" onClick={() => deleteAccount(a.id)} style={{ color: 'var(--text-faint)', cursor: 'pointer' }}>✕</span>
               <div style={{ textAlign: 'end' }}>
-                <span className={`atype ${a.type}`}>{a.type === 'live' ? 'Live' : 'Demo'}</span>
+                <span className={`atype ${a.type}`}>{a.type === 'live' ? t('liveLabel') : t('demoLabel')}</span>
                 <div className="aname">{a.name}</div>
               </div>
             </div>
@@ -104,7 +104,7 @@ export default function Settings() {
             {['ibkr', 'alpaca', 'demo'].map((p) => (
               <div key={p} className={`provider-opt ${guardForm.scanner_provider === p ? 'selected' : ''}`}
                 onClick={() => setGuardForm({ ...guardForm, scanner_provider: p })} style={{ cursor: 'pointer' }}>
-                {p === 'ibkr' ? 'IBKR' : p === 'alpaca' ? 'Alpaca' : 'Demo'}
+                {p === 'ibkr' ? 'IBKR' : p === 'alpaca' ? 'Alpaca' : t('demoLabel')}
               </div>
             ))}
           </div>
@@ -125,11 +125,11 @@ export default function Settings() {
               </p>
             </div>
           )}
-          <button className="btn btn-primary" style={{ marginTop: 14 }} onClick={saveGuard}>שמור מקור נתונים</button>
+          <button className="btn btn-primary" style={{ marginTop: 14 }} onClick={saveGuard}>{t('saveDataSource')}</button>
         </div>
 
         <div className="panel">
-          <h2 style={{ textAlign: 'end' }}>חשבון</h2>
+          <h2 style={{ textAlign: 'end' }}>{t('accountLabel')}</h2>
           <p style={{ textAlign: 'end', color: 'var(--text-dim)' }}>{data.user?.email}</p>
         </div>
       </section>

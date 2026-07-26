@@ -16,27 +16,27 @@ export default function Journal() {
   }
 
   return (
-    <Layout activeAccountName={data.activeAccount?.name} accountCount={data.accounts.length}>
+    <Layout activeAccountName={data.activeAccount?.name} accountCount={data.accounts.length} isAdmin={data.profile?.isAdmin}>
       <section className="page">
         <div className="page-head">
           <div><h1>{t('journalTitle')}</h1><p>{t('journalSub')}</p></div>
           <button className="btn btn-primary" onClick={tradeModal.open}>➕ {t('addTrade')}</button>
         </div>
         <div className="tabbar">
-          <span className="tab">Weekly</span>
-          <span className="tab">Calendar</span>
-          <span className="tab active">List</span>
+          <span className="tab">{t('weekly')}</span>
+          <span className="tab">{t('calendar')}</span>
+          <span className="tab active">{t('listView')}</span>
         </div>
         {!data.trades.length ? (
           <div className="empty-state"><div className="icon">📖</div><p>{t('noTrades')}</p></div>
         ) : (
-          data.trades.map((t) => (
-            <div key={t.id} className={`trade-row ${t.pnl >= 0 ? 'win' : 'loss'}`}>
-              <span className="sym">{t.symbol}</span>
-              <span className={`side ${t.side}`}>{t.side === 'long' ? 'Long' : 'Short'}</span>
-              <span className="meta">{t.trade_date} · {t.qty} מניות · כניסה ${t.entry} → יציאה ${t.exit}</span>
-              <span className={`pnl ${t.pnl >= 0 ? 'pos' : 'neg'}`}>{t.pnl >= 0 ? '+' : ''}${Number(t.pnl).toFixed(2)}</span>
-              <span className="del" onClick={() => del(t.id)}>✕</span>
+          data.trades.map((trade) => (
+            <div key={trade.id} className={`trade-row ${trade.pnl >= 0 ? 'win' : 'loss'}`}>
+              <span className="sym">{trade.symbol}</span>
+              <span className={`side ${trade.side}`}>{trade.side === 'long' ? t('long') : t('short')}</span>
+              <span className="meta">{trade.trade_date} · {trade.qty} מניות · כניסה ${trade.entry} → יציאה ${trade.exit}</span>
+              <span className={`pnl ${trade.pnl >= 0 ? 'pos' : 'neg'}`}>{trade.pnl >= 0 ? '+' : ''}${Number(trade.pnl).toFixed(2)}</span>
+              <span className="del" onClick={() => del(trade.id)}>✕</span>
             </div>
           ))
         )}

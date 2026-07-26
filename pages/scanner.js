@@ -59,7 +59,7 @@ export default function Scanner() {
   const filtered = results.filter(r => !search || r.sym.includes(search.toUpperCase()));
 
   return (
-    <Layout activeAccountName={data.activeAccount?.name} accountCount={data.accounts.length}>
+    <Layout activeAccountName={data.activeAccount?.name} accountCount={data.accounts.length} isAdmin={data.profile?.isAdmin}>
       <section className="page">
         {!dismissDisclaimer && (
           <div className="panel" style={{ borderColor: 'rgba(245,158,11,.35)', background: 'rgba(245,158,11,.06)' }}>
@@ -77,7 +77,7 @@ export default function Scanner() {
 
         <div className="scanner-bar">
           <button className="btn btn-ghost" onClick={runScan}>{t('scan')}</button>
-          <span className="account-pill" style={{ color: 'var(--green)', borderColor: 'rgba(34,197,94,.3)' }}>Live</span>
+          <span className="account-pill" style={{ color: 'var(--green)', borderColor: 'rgba(34,197,94,.3)' }}>{t('liveLabel')}</span>
           {pushStatus !== 'enabled' && (
             <button className="btn btn-primary" onClick={enablePush}>{t('enablePush')}</button>
           )}
@@ -87,7 +87,7 @@ export default function Scanner() {
             <span className="dot" /> {t('scannerTitle')}
           </div>
         </div>
-        <p className="scan-sub" style={{ textAlign: 'end', marginBottom: 16 }}>Real-time momentum scanner • {lastScan}</p>
+        <p className="scan-sub" style={{ textAlign: 'end', marginBottom: 16 }}>{t('realtimeScanner')} • {lastScan}</p>
 
         <input className="search-input" placeholder={t('searchTicker')} value={search} onChange={(e) => setSearch(e.target.value)} />
 
@@ -100,8 +100,8 @@ export default function Scanner() {
               <span className={`heat-pill ${r.heat >= 85 ? 'heat-hot' : r.heat >= 65 ? 'heat-warm' : 'heat-mild'}`}>🔥 {r.heat}</span>
               <span className="price">${r.price}</span>
               <span className={`chg ${r.chg >= 0 ? 'pos' : 'neg'}`}>{r.chg >= 0 ? '+' : ''}{r.chg}%</span>
-              <span className="meta" style={{ fontSize: 11.5, color: 'var(--text-faint)' }}>Float {r.float}M</span>
-              <span className="meta" style={{ fontSize: 11.5, color: 'var(--text-faint)' }}>Vol {(r.vol / 1e6).toFixed(1)}M</span>
+              <span className="meta" style={{ fontSize: 11.5, color: 'var(--text-faint)' }}>{t('floatLabel')} {r.float}M</span>
+              <span className="meta" style={{ fontSize: 11.5, color: 'var(--text-faint)' }}>{t('volLabel')} {(r.vol / 1e6).toFixed(1)}M</span>
             </div>
           ))}
         </div>
@@ -109,10 +109,10 @@ export default function Scanner() {
         <div className="criteria-box">
           <h3>{t('scannerCriteria')}</h3>
           <div className="criteria-grid">
-            <span className="criteria-pill">+Change 20% ●</span>
-            <span className="criteria-pill">Price $2-$20 ●</span>
-            <span className="criteria-pill">Float under 20M ●</span>
-            <span className="criteria-pill">Data: {provider === 'demo' ? 'Demo' : provider === 'alpaca' ? 'Alpaca' : 'IBKR'} ●</span>
+            <span className="criteria-pill">{t('criteriaChange')}</span>
+            <span className="criteria-pill">{t('criteriaPrice')}</span>
+            <span className="criteria-pill">{t('criteriaFloat')}</span>
+            <span className="criteria-pill">{t('criteriaData')}: {provider === 'demo' ? t('demoLabel') : provider === 'alpaca' ? 'Alpaca' : 'IBKR'} ●</span>
           </div>
         </div>
       </section>

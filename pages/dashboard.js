@@ -36,7 +36,7 @@ export default function Dashboard() {
   const fmt = (v) => (v >= 0 ? '$' : '-$') + Math.abs(v).toFixed(2);
 
   return (
-    <Layout activeAccountName={data.activeAccount?.name} accountCount={data.accounts.length}>
+    <Layout activeAccountName={data.activeAccount?.name} accountCount={data.accounts.length} isAdmin={data.profile?.isAdmin}>
       <section className="page">
         <div className="page-head">
           <div><h1>{t('dashTitle')}</h1><p>{t('dashSub')}</p></div>
