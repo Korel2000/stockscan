@@ -4,9 +4,7 @@ import { supabase } from '../lib/supabaseClient';
 import { useLanguage } from '../lib/i18n';
 
 const OAUTH_PROVIDERS = [
-  { id: 'google', label: 'Google', color: '#fff', bg: '#fff', textColor: '#111' },
-  { id: 'facebook', label: 'Facebook', color: '#fff', bg: '#1877F2', textColor: '#fff' },
-  { id: 'twitter', label: 'X / Twitter', color: '#fff', bg: '#000', textColor: '#fff' }
+  { id: 'google', label: 'Google', color: '#fff', bg: '#fff', textColor: '#111' }
 ];
 
 export default function Login() {
