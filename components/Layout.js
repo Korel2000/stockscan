@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
 import { useLanguage } from '../lib/i18n';
+import AssistantWidget from './AssistantWidget';
 
 export default function Layout({ children, activeAccountName, accountCount = 1, isAdmin = false }) {
   const router = useRouter();
@@ -12,6 +13,7 @@ export default function Layout({ children, activeAccountName, accountCount = 1, 
     { href: '/journal', label: t('journal') },
     { href: '/analytics', label: t('analytics') },
     { href: '/scanner', label: t('scanner') },
+    { href: '/assistant', label: t('assistantTitle') },
     { href: '/settings', label: t('settings') },
     ...(isAdmin ? [{ href: '/admin', label: t('adminTitle') }] : [])
   ];
@@ -54,6 +56,7 @@ export default function Layout({ children, activeAccountName, accountCount = 1, 
         </div>
         {children}
       </div>
+      <AssistantWidget />
     </div>
   );
 }
