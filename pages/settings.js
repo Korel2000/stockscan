@@ -12,13 +12,20 @@ export default function Settings() {
   const [newAcc, setNewAcc] = useState({ name: '', type: 'demo', balance: '' });
   const [showAccModal, setShowAccModal] = useState(false);
 
+  const [saving, setSaving] = useState(false);
+
   useEffect(() => { if (data.guard) setGuardForm(data.guard); }, [data.guard]);
 
   if (!data.ready || !guardForm) return <Layout><div className="page" /></Layout>;
 
   async function saveGuard() {
-    await data.apiFetch('/api/settings', { method: 'POST', body: JSON.stringify(guardForm) });
-    toast('ההגדרות נשמרו');
+    setSaving(true);
+    try {
+      await data.apiFetch('/api/settings', { method: 'POST', body: JSON.stringify(guardForm) });
+      toast('ההגדרות נשמרו');
+    } finally {
+      setSaving(false);
+    }
   }
 
   async function createAccount() {
@@ -35,6 +42,7 @@ export default function Settings() {
 
   async function deleteAccount(id) {
     if (data.accounts.length === 1) { toast('חייב להישאר לפחות חשבון אחד'); return; }
+    if (!window.confirm(t('confirmDeleteAccount'))) return;
     await data.apiFetch(`/api/accounts?id=${id}`, { method: 'DELETE' });
     await data.refreshAccounts();
   }
@@ -77,7 +85,7 @@ export default function Settings() {
             onChange={(v) => setGuardForm({ ...guardForm, daily_profit_target: v })}
             desc={t('dailyProfitDesc')} />
           <div className="modal-actions">
-            <button className="btn btn-primary" onClick={saveGuard}>{t('saveChanges')}</button>
+            <button className="btn btn-primary" onClick={saveGuard} disabled={saving}>{saving ? t('saving') : t('saveChanges')}</button>
             <button className="btn btn-ghost" onClick={() => setGuardForm(data.guard)}>{t('reset')}</button>
           </div>
         </div>
@@ -87,7 +95,10 @@ export default function Settings() {
           <p className="hint" style={{ textAlign: 'end' }}>כמה חשבונות (Live / Demo) — לכל אחד נתונים נפרדים בדשבורד וביומן.</p>
           {data.accounts.map((a) => (
             <div key={a.id} className="account-card">
-              <span className="del" onClick={() => deleteAccount(a.id)} style={{ color: 'var(--text-faint)', cursor: 'pointer' }}>✕</span>
+              <span className="del" role="button" tabIndex={0} aria-label={t('confirmDeleteAccount')}
+                onClick={() => deleteAccount(a.id)}
+                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && deleteAccount(a.id)}
+                style={{ color: 'var(--text-faint)', cursor: 'pointer' }}>✕</span>
               <div style={{ textAlign: 'end' }}>
                 <span className={`atype ${a.type}`}>{a.type === 'live' ? t('liveLabel') : t('demoLabel')}</span>
                 <div className="aname">{a.name}</div>
@@ -103,29 +114,32 @@ export default function Settings() {
           <div className="provider-row">
             {['ibkr', 'alpaca', 'demo'].map((p) => (
               <div key={p} className={`provider-opt ${guardForm.scanner_provider === p ? 'selected' : ''}`}
-                onClick={() => setGuardForm({ ...guardForm, scanner_provider: p })} style={{ cursor: 'pointer' }}>
+                role="button" tabIndex={0}
+                onClick={() => setGuardForm({ ...guardForm, scanner_provider: p })}
+                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setGuardForm({ ...guardForm, scanner_provider: p })}
+                style={{ cursor: 'pointer' }}>
                 {p === 'ibkr' ? 'IBKR' : p === 'alpaca' ? 'Alpaca' : t('demoLabel')}
               </div>
             ))}
           </div>
           {guardForm.scanner_provider === 'alpaca' && (
             <div className="field" style={{ marginTop: 14 }}>
-              <label>Alpaca API Key:Secret</label>
-              <input value={guardForm.provider_api_key || ''} onChange={(e) => setGuardForm({ ...guardForm, provider_api_key: e.target.value })} placeholder="KEY_ID:SECRET_KEY" />
+              <label htmlFor="alpaca-key">Alpaca API Key:Secret</label>
+              <input id="alpaca-key" value={guardForm.provider_api_key || ''} onChange={(e) => setGuardForm({ ...guardForm, provider_api_key: e.target.value })} placeholder="KEY_ID:SECRET_KEY" />
               <p className="desc">עובד ישירות מהדפדפן — נתונים אמיתיים מהשוק.</p>
             </div>
           )}
           {guardForm.scanner_provider === 'ibkr' && (
             <div className="field" style={{ marginTop: 14 }}>
-              <label>כתובת IB Gateway / Client Portal Gateway המקומי</label>
-              <input value={guardForm.ibkr_gateway_url || ''} onChange={(e) => setGuardForm({ ...guardForm, ibkr_gateway_url: e.target.value })} placeholder="https://localhost:5000" />
+              <label htmlFor="ibkr-gateway">כתובת IB Gateway / Client Portal Gateway המקומי</label>
+              <input id="ibkr-gateway" value={guardForm.ibkr_gateway_url || ''} onChange={(e) => setGuardForm({ ...guardForm, ibkr_gateway_url: e.target.value })} placeholder="https://localhost:5000" />
               <p className="desc">
                 דורש הרצה של IB Gateway פעיל על המחשב שלך, עם התחברות ידנית ואישור 2FA.
                 עובד רק כשהוא פעיל על אותה רשת שבה נמצא המכשיר שגולש כאן — לא ניתן להריץ את זה מהענן בלי מחשב שלך פועל.
               </p>
             </div>
           )}
-          <button className="btn btn-primary" style={{ marginTop: 14 }} onClick={saveGuard}>{t('saveDataSource')}</button>
+          <button className="btn btn-primary" style={{ marginTop: 14 }} onClick={saveGuard} disabled={saving}>{saving ? t('saving') : t('saveDataSource')}</button>
         </div>
 
         <div className="panel">
