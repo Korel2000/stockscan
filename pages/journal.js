@@ -11,6 +11,7 @@ export default function Journal() {
   if (!data.ready) return <Layout><div className="page" /></Layout>;
 
   async function del(id) {
+    if (!window.confirm(t('confirmDeleteTrade'))) return;
     await data.apiFetch(`/api/trades?id=${id}`, { method: 'DELETE' });
     await data.refreshTrades();
   }
@@ -36,7 +37,9 @@ export default function Journal() {
               <span className={`side ${trade.side}`}>{trade.side === 'long' ? t('long') : t('short')}</span>
               <span className="meta">{trade.trade_date} · {trade.qty} מניות · כניסה ${trade.entry} → יציאה ${trade.exit}</span>
               <span className={`pnl ${trade.pnl >= 0 ? 'pos' : 'neg'}`}>{trade.pnl >= 0 ? '+' : ''}${Number(trade.pnl).toFixed(2)}</span>
-              <span className="del" onClick={() => del(trade.id)}>✕</span>
+              <span className="del" role="button" tabIndex={0} aria-label={t('confirmDeleteTrade')}
+                onClick={() => del(trade.id)}
+                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && del(trade.id)}>✕</span>
             </div>
           ))
         )}
