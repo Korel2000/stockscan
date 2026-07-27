@@ -29,11 +29,30 @@ export default function Landing() {
 
       <section className="landing-hero">
         <span className="landing-badge">✦ StockScan</span>
-        <h1>{t('landingHeroTitle')}</h1>
+        <h1>
+          {t('landingHeroLine1')}<br />
+          <span className="landing-hero-accent">{t('landingHeroLine2')}</span>
+        </h1>
         <p>{t('landingHeroSub')}</p>
         <div className="landing-cta-row">
           <Link href="/login" className="btn btn-primary" style={{ fontSize: 15, padding: '13px 26px' }}>{t('landingCta')}</Link>
           <a href="#features" className="btn btn-ghost" style={{ fontSize: 14 }}>{t('landingHowItWorks')}</a>
+        </div>
+        <p className="landing-free-note">{t('landingFreeNote')}</p>
+      </section>
+
+      <section className="landing-scanner">
+        <h2>{t('landingScannerTitle')}</h2>
+        <p className="hint muted">{t('landingScannerSub')}</p>
+        <div className="criteria-grid" style={{ maxWidth: 700, margin: '18px auto 26px' }}>
+          <span className="criteria-pill">{t('criteriaChange')}</span>
+          <span className="criteria-pill">{t('criteriaPrice')}</span>
+          <span className="criteria-pill">{t('criteriaFloat')}</span>
+        </div>
+        <div className="landing-scanner-points">
+          {[t('landingScannerPoint1'), t('landingScannerPoint2'), t('landingScannerPoint3'), t('landingScannerPoint4')].map((p, i) => (
+            <div key={i} className="landing-scanner-point">✓ {p}</div>
+          ))}
         </div>
       </section>
 
