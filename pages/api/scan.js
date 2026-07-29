@@ -1,8 +1,12 @@
-export async function runScanForProvider() {
-  const apiKey = process.env.BENZINGA_API_KEY || 'bz.475QAKPCWSTF3CRBH2TDENZSNVEFJCJL';
+export default async function handler(req, res) {
+  const apiKey = process.env.BENZINGA_API_KEY;
+
+  if (!apiKey) {
+    return res.status(500).json({ success: false, error: 'API key is missing in environment variables' });
+  }
 
   try {
-    // שליפת נתונים אמיתיים מ-Benzinga API
+    // שליפת נתונים מ-Benzinga API
     const response = await fetch(`https://api.benzinga.com/api/v2/news?token=${apiKey}&pageSize=10`);
     
     if (!response.ok) {
@@ -10,17 +14,17 @@ export async function runScanForProvider() {
     }
 
     const data = await response.json();
-    
-    // כאן תוכל לעבד את הנתונים שמגיעים מבנזינגה ולהחזיר אותם לסורק
-    return {
+
+    // מחזיר את הנתונים בחזרה לאפליקציה
+    return res.status(200).json({
       success: true,
-      items: data || []
-    };
+      data: data
+    });
   } catch (error) {
-    console.error('Scan error:', error);
-    return {
+    console.error('Scan API error:', error);
+    return res.status(500).json({
       success: false,
       error: error.message
-    };
+    });
   }
 }
