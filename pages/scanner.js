@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Layout from '../components/Layout';
 import { useAppData } from '../lib/useAppData';
+import QuoteModal from '../components/QuoteModal';
 import { useLanguage } from '../lib/i18n';
 
 function urlBase64ToUint8Array(base64String) {
@@ -19,6 +20,7 @@ export default function Scanner() {
   const [lastScan, setLastScan] = useState('');
   const [dismissDisclaimer, setDismissDisclaimer] = useState(false);
   const [pushStatus, setPushStatus] = useState('unknown');
+  const [selectedSymbol, setSelectedSymbol] = useState(null);
   const timerRef = useRef(null);
 
   async function runScan() {
@@ -95,7 +97,9 @@ export default function Scanner() {
           {filtered.length === 0 ? (
             <p className="scan-sub" style={{ textAlign: 'center', marginTop: 30 }}>{t('noMatch')}</p>
           ) : filtered.map((r) => (
-            <div key={r.sym} className="stock-row">
+            <div key={r.sym} className="stock-row" role="button" tabIndex={0} style={{ cursor: 'pointer' }}
+              onClick={() => setSelectedSymbol(r.sym)}
+              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setSelectedSymbol(r.sym)}>
               <span className="sym">{r.sym}</span>
               <span className={`heat-pill ${r.heat >= 85 ? 'heat-hot' : r.heat >= 65 ? 'heat-warm' : 'heat-mild'}`}>🔥 {r.heat}</span>
               <span className="price">${r.price}</span>
@@ -105,6 +109,10 @@ export default function Scanner() {
             </div>
           ))}
         </div>
+
+        {selectedSymbol && (
+          <QuoteModal symbol={selectedSymbol} apiFetch={data.apiFetch} onClose={() => setSelectedSymbol(null)} />
+        )}
 
         <div className="criteria-box">
           <h3>{t('scannerCriteria')}</h3>
