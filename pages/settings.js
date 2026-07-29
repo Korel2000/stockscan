@@ -1,248 +1,183 @@
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
-import Link from 'next/link';
-import Layout from '../components/Layout';
-import { useAppData } from '../lib/useAppData';
-import { useToast } from '../components/Toast';
-import { supabase } from '../lib/supabaseClient';
-import { useLanguage } from '../lib/i18n';
+/* =========================================
+   Modern Settings UI - Buttons & Layout
+========================================= */
 
-export default function Settings() {
-  const data = useAppData();
-  const router = useRouter();
-  const { toast, ToastEl } = useToast();
-  const { t } = useLanguage();
-  const [guardForm, setGuardForm] = useState(null);
-  const [newAcc, setNewAcc] = useState({ name: '', type: 'demo', balance: '' });
-  const [showAccModal, setShowAccModal] = useState(false);
-
-  const [saving, setSaving] = useState(false);
-  const [dismissTip, setDismissTip] = useState(false);
-
-  useEffect(() => { if (data.guard) setGuardForm(data.guard); }, [data.guard]);
-
-  if (!data.ready || !guardForm) return <Layout><div className="page" /></Layout>;
-
-  async function saveGuard() {
-    setSaving(true);
-    try {
-      await data.apiFetch('/api/settings', { method: 'POST', body: JSON.stringify(guardForm) });
-      toast('ההגדרות נשמרו');
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function createAccount() {
-    if (!newAcc.name.trim()) { toast('נא להזין שם חשבון'); return; }
-    await data.apiFetch('/api/accounts', {
-      method: 'POST',
-      body: JSON.stringify({ name: newAcc.name, type: newAcc.type, balance: parseFloat(newAcc.balance) || 0 })
-    });
-    await data.refreshAccounts();
-    setShowAccModal(false);
-    setNewAcc({ name: '', type: 'demo', balance: '' });
-    toast('החשבון נוצר');
-  }
-
-  async function deleteAccount(id) {
-    if (data.accounts.length === 1) { toast('חייב להישאר לפחות חשבון אחד'); return; }
-    if (!window.confirm(t('confirmDeleteAccount'))) return;
-    await data.apiFetch(`/api/accounts?id=${id}`, { method: 'DELETE' });
-    await data.refreshAccounts();
-  }
-
-  async function connectGoogle() {
-    try {
-      const { error } = await supabase.auth.linkIdentity({
-        provider: 'google',
-        options: { redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/settings` : undefined }
-      });
-      if (error) throw error;
-    } catch (e) {
-      toast(e.message || t('connectError'));
-    }
-  }
-
-  async function signOutNow() {
-    await supabase.auth.signOut();
-    router.push('/login');
-  }
-
-  function sendTestNotif() {
-    if (Notification.permission === 'granted') {
-      new Notification('בדיקת התראה 🔔', { body: 'זו התראת בדיקה מ-StockScan', icon: '/icons/icon-192.png' });
-    } else {
-      toast('צריך קודם להפעיל התראות בעמוד הסורק');
-    }
-  }
-
-  return (
-    <Layout activeAccountName={data.activeAccount?.name} accountCount={data.accounts.length} isAdmin={data.profile?.isAdmin}>
-      <section className="page">
-        <div className="page-head"><div><h1>{t('settingsTitle')}</h1><p>{t('settingsSub')}</p></div></div>
-
-        <div className="profile-card">
-          <div className="profile-top">
-            <div className="profile-avatar">{(data.user?.email || '?')[0].toUpperCase()}</div>
-            <div className="profile-name-wrap">
-              <div className="profile-name">{data.user?.email}</div>
-              <span className="profile-badge">{data.profile?.isAdmin ? t('adminTitle') : t('accountLabel')}</span>
-            </div>
-          </div>
-          <div className="profile-stats">
-            <div className="profile-stat"><div className="profile-stat-num">{data.accounts.length}</div><div className="profile-stat-label">{t('tradingAccounts')}</div></div>
-            <div className="profile-stat"><div className="profile-stat-num">{data.trades.length}</div><div className="profile-stat-label">{t('trades')}</div></div>
-            <div className="profile-stat"><div className="profile-stat-num">{data.trades.length ? Math.round((data.trades.filter(tr => tr.pnl > 0).length / data.trades.length) * 100) : 0}%</div><div className="profile-stat-label">{t('winRate')}</div></div>
-          </div>
-        </div>
-
-        <div className="profile-shortcuts">
-          <a className="shortcut-card" href="#accounts-panel">
-            <span className="shortcut-icon">💼</span>
-            <div className="shortcut-title">{t('tradingAccounts')}</div>
-            <div className="shortcut-sub">{t('shortcutAccountsSub')}</div>
-          </a>
-          <Link className="shortcut-card" href="/assistant">
-            <span className="shortcut-icon">🤖</span>
-            <div className="shortcut-title">{t('assistantTitle')}</div>
-            <div className="shortcut-sub">{t('shortcutAssistantSub')}</div>
-          </Link>
-        </div>
-
-        {!dismissTip && (
-          <div className="tip-card">
-            <button className="tip-close" onClick={() => setDismissTip(true)} aria-label={t('cancel')}>✕</button>
-            <h3>{t('tipTitle')}</h3>
-            <p>{t('tipBody')}</p>
-            <Link href="/journal" className="tip-btn">‹ {t('journalTitle')}</Link>
-          </div>
-        )}
-
-        <div className="menu-list">
-          <a className="menu-row" href="#guard-panel"><span>{t('traderGuard')}</span><span className="menu-icon">⚙️</span></a>
-          <a className="menu-row" href="#datasource-panel"><span>{t('dataSource')}</span><span className="menu-icon">🔌</span></a>
-          <a className="menu-row" href="#push-panel"><span>{t('pushNotifications')}</span><span className="menu-icon">🔔</span></a>
-          <div className="menu-row" role="button" tabIndex={0} onClick={connectGoogle} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && connectGoogle()}>
-            <span>{t('connectGoogleBtn')}</span><span className="menu-icon">🔗</span>
-          </div>
-          <div className="menu-row danger" role="button" tabIndex={0} onClick={signOutNow} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && signOutNow()}>
-            <span>{t('signOut')}</span><span className="menu-icon">↪</span>
-          </div>
-        </div>
-
-        <div className="panel" id="push-panel">
-          <h2 style={{ textAlign: 'end' }}>{t('pushNotifications')}</h2>
-          <p className="hint" style={{ textAlign: 'end' }}>תקבל התראות Push כאשר מניה חמה (Heat ≥ 85) מופיעה בסורק — גם כשהאפליקציה סגורה, לאחר שהופעל בעמוד הסורק.</p>
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-            <button className="btn btn-ghost" onClick={sendTestNotif}>{t('sendTest')}</button>
-            <a className="btn btn-ghost" href="/scanner">להפעלה → עמוד הסורק</a>
-          </div>
-        </div>
-
-        <div className="panel" id="guard-panel">
-          <h2 style={{ textAlign: 'end' }}>{t('traderGuard')}</h2>
-          <p className="hint" style={{ textAlign: 'end' }}>הגדר את מגבלות ניהול הסיכון. תקבל התראות כשמגיעים לסף.</p>
-          <Slider label={t('lossStreakLimit')} value={guardForm.loss_streak_limit} min={1} max={10}
-            onChange={(v) => setGuardForm({ ...guardForm, loss_streak_limit: v })}
-            desc={t('lossStreakDesc')} />
-          <Slider label={t('maxTradesPerDay')} value={guardForm.max_trades_per_day} min={1} max={30}
-            onChange={(v) => setGuardForm({ ...guardForm, max_trades_per_day: v })}
-            desc={t('maxTradesDesc')} />
-          <Slider label={t('dailyLossLimit')} value={guardForm.daily_loss_limit} min={10} max={2000} step={10}
-            onChange={(v) => setGuardForm({ ...guardForm, daily_loss_limit: v })}
-            desc={t('dailyLossDesc')} />
-          <Slider label={t('dailyProfitTarget')} value={guardForm.daily_profit_target} min={10} max={5000} step={10}
-            onChange={(v) => setGuardForm({ ...guardForm, daily_profit_target: v })}
-            desc={t('dailyProfitDesc')} />
-          <div className="modal-actions">
-            <button className="btn btn-primary" onClick={saveGuard} disabled={saving}>{saving ? t('saving') : t('saveChanges')}</button>
-            <button className="btn btn-ghost" onClick={() => setGuardForm(data.guard)}>{t('reset')}</button>
-          </div>
-        </div>
-
-        <div className="panel" id="accounts-panel">
-          <h2 style={{ textAlign: 'end' }}>{t('tradingAccounts')}</h2>
-          <p className="hint" style={{ textAlign: 'end' }}>כמה חשבונות (Live / Demo) — לכל אחד נתונים נפרדים בדשבורד וביומן.</p>
-          {data.accounts.map((a) => (
-            <div key={a.id} className="account-card">
-              <span className="del" role="button" tabIndex={0} aria-label={t('confirmDeleteAccount')}
-                onClick={() => deleteAccount(a.id)}
-                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && deleteAccount(a.id)}
-                style={{ color: 'var(--text-faint)', cursor: 'pointer' }}>✕</span>
-              <div style={{ textAlign: 'end' }}>
-                <span className={`atype ${a.type}`}>{a.type === 'live' ? t('liveLabel') : t('demoLabel')}</span>
-                <div className="aname">{a.name}</div>
-              </div>
-            </div>
-          ))}
-          <button className="btn btn-ghost" style={{ width: '100%', marginTop: 10, justifyContent: 'center' }} onClick={() => setShowAccModal(true)}>{t('addAccount')}</button>
-        </div>
-
-        <div className="panel" id="datasource-panel">
-          <h2 style={{ textAlign: 'end' }}>{t('dataSource')}</h2>
-          <p className="hint muted" style={{ textAlign: 'end' }}>בחר את מקור הנתונים לסריקת מניות בזמן אמת.</p>
-          <div className="provider-row">
-            {['ibkr', 'alpaca', 'demo'].map((p) => (
-              <div key={p} className={`provider-opt ${guardForm.scanner_provider === p ? 'selected' : ''}`}
-                role="button" tabIndex={0}
-                onClick={() => setGuardForm({ ...guardForm, scanner_provider: p })}
-                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setGuardForm({ ...guardForm, scanner_provider: p })}
-                style={{ cursor: 'pointer' }}>
-                {p === 'ibkr' ? 'IBKR' : p === 'alpaca' ? 'Alpaca' : t('demoLabel')}
-              </div>
-            ))}
-          </div>
-          {guardForm.scanner_provider === 'alpaca' && (
-            <div className="field" style={{ marginTop: 14 }}>
-              <label htmlFor="alpaca-key">Alpaca API Key:Secret</label>
-              <input id="alpaca-key" value={guardForm.provider_api_key || ''} onChange={(e) => setGuardForm({ ...guardForm, provider_api_key: e.target.value })} placeholder="KEY_ID:SECRET_KEY" />
-              <p className="desc">עובד ישירות מהדפדפן — נתונים אמיתיים מהשוק.</p>
-            </div>
-          )}
-          {guardForm.scanner_provider === 'ibkr' && (
-            <div className="field" style={{ marginTop: 14 }}>
-              <label htmlFor="ibkr-gateway">כתובת IB Gateway / Client Portal Gateway המקומי</label>
-              <input id="ibkr-gateway" value={guardForm.ibkr_gateway_url || ''} onChange={(e) => setGuardForm({ ...guardForm, ibkr_gateway_url: e.target.value })} placeholder="https://localhost:5000" />
-              <p className="desc">
-                דורש הרצה של IB Gateway פעיל על המחשב שלך, עם התחברות ידנית ואישור 2FA.
-                עובד רק כשהוא פעיל על אותה רשת שבה נמצא המכשיר שגולש כאן — לא ניתן להריץ את זה מהענן בלי מחשב שלך פועל.
-              </p>
-            </div>
-          )}
-          <button className="btn btn-primary" style={{ marginTop: 14 }} onClick={saveGuard} disabled={saving}>{saving ? t('saving') : t('saveDataSource')}</button>
-        </div>
-
-      </section>
-
-      {showAccModal && (
-        <div className="modal-backdrop show">
-          <div className="modal">
-            <h2 style={{ textAlign: 'end' }}>יצירת חשבון</h2>
-            <div className="field"><input value={newAcc.name} onChange={(e) => setNewAcc({ ...newAcc, name: e.target.value })} placeholder="שם החשבון (למשל: IBKR Live, Colmex Demo)" style={{ textAlign: 'end' }} /></div>
-            <div className="field"><input type="number" value={newAcc.balance} onChange={(e) => setNewAcc({ ...newAcc, balance: e.target.value })} placeholder="יתרה התחלתית ($) — אופציונלי" style={{ textAlign: 'end' }} /></div>
-            <div className="grid-2">
-              <button className={`provider-opt ${newAcc.type === 'demo' ? 'selected' : ''}`} onClick={() => setNewAcc({ ...newAcc, type: 'demo' })}>נסיון · Demo</button>
-              <button className={`provider-opt ${newAcc.type === 'live' ? 'selected' : ''}`} style={{ color: 'var(--green)' }} onClick={() => setNewAcc({ ...newAcc, type: 'live' })}>אמיתי · Live</button>
-            </div>
-            <div className="modal-actions">
-              <button className="btn btn-primary" onClick={createAccount}>יצירת חשבון</button>
-              <button className="btn btn-ghost" onClick={() => setShowAccModal(false)}>ביטול</button>
-            </div>
-          </div>
-        </div>
-      )}
-      <ToastEl />
-    </Layout>
-  );
+.modern-settings {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  direction: rtl;
+  font-family: system-ui, -apple-system, sans-serif;
+  color: #1e293b;
 }
 
-function Slider({ label, value, min, max, step = 1, onChange, desc }) {
-  return (
-    <div className="field">
-      <label>{label} <span className="slider-val">{value}</span></label>
-      <div className="slider-row"><input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(+e.target.value)} /></div>
-      <p className="desc">{desc}</p>
-    </div>
-  );
+/* כותרות ראשיות */
+.page-head h1 { font-size: 28px; font-weight: 800; margin-bottom: 5px; }
+.page-head p { color: #64748b; margin-top: 0; }
+.panel h2 { font-size: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 5px; }
+.hint { color: #64748b; font-size: 14px; margin-bottom: 20px; }
+
+/* פאנלים / כרטיסיות */
+.panel {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s ease;
 }
+.panel:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); }
+
+/* מערכת כפתורים בולטים ומסודרים */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+.btn-primary:hover:not(:disabled) { box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4); transform: translateY(-1px); }
+
+.btn-secondary {
+  background: #f1f5f9;
+  color: #334155;
+}
+.btn-secondary:hover { background: #e2e8f0; }
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid #cbd5e1;
+  color: #475569;
+}
+.btn-outline:hover { border-color: #94a3b8; color: #1e293b; }
+
+.btn-ghost {
+  background: transparent;
+  color: #64748b;
+}
+.btn-ghost:hover { background: #f8fafc; color: #0f172a; }
+
+.btn-reset {
+  background: none; border: none; padding: 0; font: inherit; cursor: pointer; text-align: inherit;
+}
+
+.large { padding: 14px 28px; font-size: 16px; }
+.full-width { width: 100%; }
+
+/* ארגון כפתורים ברחבי המסך */
+.panel-actions { display: flex; gap: 12px; align-items: center; margin-top: 24px; }
+.panel-actions.left { justify-content: flex-end; /* מכיוון שזה RTL, זה יצמיד לשמאל */ }
+.modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
+
+/* גריד בחירות (Live/Demo/Alpaca) */
+.provider-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+.provider-opt {
+  padding: 14px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #64748b;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.provider-opt:hover { border-color: #cbd5e1; }
+.provider-opt.selected {
+  border-color: #3b82f6; background: #eff6ff; color: #1d4ed8;
+}
+.provider-opt.live-opt.selected {
+  border-color: #10b981; background: #ecfdf5; color: #047857;
+}
+
+/* שדות קלט (Inputs) */
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 14px; font-weight: 600; color: #475569; margin-bottom: 6px; }
+.field input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 15px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.field input:focus {
+  outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* רשימת תפריטים (Menu List) */
+.menu-list {
+  background: #ffffff; border-radius: 16px; padding: 8px; border: 1px solid #e2e8f0; margin-bottom: 30px;
+}
+.menu-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 20px; text-decoration: none; color: #1e293b; font-weight: 600;
+  border-radius: 10px; transition: background 0.2s; width: 100%;
+}
+.menu-row:hover { background: #f8fafc; }
+.menu-row.danger { color: #ef4444; }
+.menu-row.danger:hover { background: #fef2f2; }
+.menu-icon { font-size: 18px; margin-right: auto; } /* צד שמאל ב-RTL */
+
+/* חשבונות ומחיקה */
+.account-card {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0;
+  border-radius: 12px; margin-bottom: 12px;
+}
+.account-info { display: flex; flex-direction: column; gap: 4px; }
+.atype { font-size: 12px; font-weight: 700; padding: 4px 8px; border-radius: 6px; display: inline-block; width: max-content; }
+.atype.live { background: #d1fae5; color: #065f46; }
+.atype.demo { background: #e0e7ff; color: #3730a3; }
+.aname { font-size: 16px; font-weight: 600; color: #0f172a; }
+.btn-icon {
+  background: white; border: 1px solid #e2e8f0; width: 36px; height: 36px;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: #94a3b8; transition: all 0.2s;
+}
+.btn-icon.danger:hover { background: #fef2f2; color: #ef4444; border-color: #fca5a5; }
+
+/* Sliders */
+.slider-wrapper { margin-bottom: 20px; }
+.slider-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.slider-header label { font-weight: 600; font-size: 15px; color: #334155; }
+.slider-val { background: #eff6ff; color: #2563eb; padding: 2px 10px; border-radius: 20px; font-weight: 700; font-size: 14px; }
+.slider-input { width: 100%; cursor: pointer; accent-color: #3b82f6; }
+.slider-desc { font-size: 13px; color: #64748b; margin-top: 6px; }
+
+/* מרווחים פשוטים */
+.mt-10 { margin-top: 10px; }
+.mt-15 { margin-top: 15px; }
+
+/* Modal */
+.modal-backdrop {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center; z-index: 1000;
+}
+.modal {
+  background: white; width: 100%; max-width: 420px; border-radius: 20px;
+  padding: 30px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+.modal h2 { margin-top: 0; margin-bottom: 24px; font-size: 22px; }
