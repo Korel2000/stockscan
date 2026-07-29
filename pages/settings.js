@@ -134,19 +134,19 @@ export default function Settings() {
         </div>
 
         <div className="profile-shortcuts">
-          <a className="shortcut-card" href="#accounts-panel">
-            <span className="shortcut-icon">💼</span>
-            <div className="shortcut-text">
+          <Link href="#accounts-panel" passHref legacyBehavior>
+            <a className="shortcut-card">
+              <span className="shortcut-icon">💼</span>
               <div className="shortcut-title">{t('tradingAccounts')}</div>
               <div className="shortcut-sub">{t('shortcutAccountsSub')}</div>
-            </div>
-          </a>
-          <Link className="shortcut-card" href="/assistant">
-            <span className="shortcut-icon">🤖</span>
-            <div className="shortcut-text">
+            </a>
+          </Link>
+          <Link href="/assistant" passHref legacyBehavior>
+            <a className="shortcut-card">
+              <span className="shortcut-icon">🤖</span>
               <div className="shortcut-title">{t('assistantTitle')}</div>
               <div className="shortcut-sub">{t('shortcutAssistantSub')}</div>
-            </div>
+            </a>
           </Link>
         </div>
 
@@ -156,8 +156,10 @@ export default function Settings() {
               <h3>{t('tipTitle')}</h3>
               <button className="btn-icon tip-close" onClick={() => setDismissTip(true)} aria-label={t('cancel')}>✕</button>
             </div>
-            <p>{t('tipBody')}</p>
-            <Link href="/journal" className="btn btn-outline tip-btn">יומן מסחר ←</Link>
+            <p className="tip-body-text">{t('tipBody')}</p>
+            <Link href="/journal" passHref legacyBehavior>
+              <a className="tip-btn">יומן מסחר ←</a>
+            </Link>
           </div>
         )}
 
@@ -178,7 +180,9 @@ export default function Settings() {
           <p className="hint">קבל התראות Push כאשר מניה חמה מופיעה בסורק — גם כשהאפליקציה סגורה.</p>
           <div className="panel-actions left">
             <button className="btn btn-secondary" onClick={sendTestNotif}>{t('sendTest')}</button>
-            <a className="btn btn-primary" href="/scanner">להפעלה בסורק ←</a>
+            <Link href="/scanner" passHref legacyBehavior>
+              <a className="btn btn-primary">להפעלה בסורק ←</a>
+            </Link>
           </div>
         </div>
 
@@ -300,7 +304,6 @@ export default function Settings() {
       )}
       <ToastEl />
 
-      {/* העיצוב מוטמע ישירות כאן למניעת תקלות והתאמה למסך הכהה שלך */}
       <style jsx>{`
         .modern-settings {
           padding: 16px;
@@ -312,7 +315,7 @@ export default function Settings() {
           padding-bottom: 80px;
         }
 
-        .page-head { margin-bottom: 24px; }
+        .page-head { margin-bottom: 24px; text-align: right; }
         .page-head h1 { font-size: 28px; font-weight: 800; margin: 0 0 4px 0; color: #ffffff; }
         .subtitle { color: #94a3b8; font-size: 15px; margin: 0; }
 
@@ -329,32 +332,35 @@ export default function Settings() {
         .hint { color: #94a3b8; font-size: 14px; margin-bottom: 20px; line-height: 1.4; }
 
         .profile-top { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
-        .profile-avatar { width: 50px; height: 50px; border-radius: 50%; background: #3b82f6; color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; }
-        .profile-name { font-size: 18px; font-weight: bold; color: #fff; }
-        .profile-badge { font-size: 12px; padding: 4px 8px; border-radius: 6px; background: #334155; color: #cbd5e1; display: inline-block; margin-top: 4px; }
+        .profile-avatar { flex-shrink: 0; width: 56px; height: 56px; border-radius: 50%; background: #3b82f6; color: white; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; }
+        .profile-name-wrap { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 4px; overflow: hidden; width: 100%; }
+        .profile-name { font-size: 16px; font-weight: bold; color: #fff; direction: ltr; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .profile-badge { font-size: 12px; padding: 4px 10px; border-radius: 6px; background: #334155; color: #cbd5e1; font-weight: 600; }
         
-        .profile-stats { display: flex; justify-content: space-between; border-top: 1px solid #334155; padding-top: 16px; }
-        .profile-stat { text-align: center; flex: 1; }
+        .profile-stats { display: flex; justify-content: space-between; border-top: 1px solid #334155; padding-top: 16px; gap: 8px; }
+        .profile-stat { text-align: center; flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .profile-stat-num { font-size: 20px; font-weight: bold; color: #fff; }
-        .profile-stat-label { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+        .profile-stat-label { font-size: 12px; color: #94a3b8; }
 
-        .profile-shortcuts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-        .shortcut-card { background: #1e293b; border: 1px solid #334155; padding: 16px; border-radius: 16px; text-decoration: none; color: #fff; display: flex; flex-direction: column; gap: 8px; transition: background 0.2s; }
+        .profile-shortcuts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+        .shortcut-card { background: #1e293b; border: 1px solid #334155; padding: 20px 12px; border-radius: 16px; text-decoration: none; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 8px; transition: background 0.2s; }
         .shortcut-card:hover { background: #334155; }
-        .shortcut-icon { font-size: 24px; }
-        .shortcut-title { font-weight: bold; font-size: 15px; }
-        .shortcut-sub { font-size: 12px; color: #94a3b8; }
+        .shortcut-icon { font-size: 32px; line-height: 1; }
+        .shortcut-title { font-weight: bold; font-size: 15px; margin: 0; }
+        .shortcut-sub { font-size: 12px; color: #94a3b8; margin: 0; line-height: 1.3; }
 
         .tip-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .tip-header h3 { margin: 0; color: #fbbf24; font-size: 16px; }
-        .tip-card p { color: #cbd5e1; font-size: 14px; line-height: 1.5; margin-bottom: 16px; }
+        .tip-body-text { color: #cbd5e1; font-size: 14px; line-height: 1.5; margin-bottom: 16px; margin-top: 0; }
+        .tip-btn { display: inline-block; background: #3b82f6; color: white; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: bold; transition: 0.2s; }
+        .tip-btn:hover { background: #2563eb; }
 
         .menu-list { background: #1e293b; border-radius: 16px; border: 1px solid #334155; margin-bottom: 24px; overflow: hidden; }
         .menu-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; text-decoration: none; color: #fff; font-weight: 600; font-size: 15px; border-bottom: 1px solid #334155; width: 100%; transition: background 0.2s; }
         .menu-row:last-child { border-bottom: none; }
         .menu-row:hover { background: #334155; }
         .menu-row.danger { color: #f87171; }
-        .menu-icon { opacity: 0.7; }
+        .menu-icon { opacity: 0.7; font-size: 18px; }
         
         .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; font-size: 15px; font-weight: 600; border-radius: 10px; cursor: pointer; border: none; text-decoration: none; transition: 0.2s; }
         .btn:disabled { opacity: 0.5; }
@@ -367,6 +373,7 @@ export default function Settings() {
         
         .btn-icon { background: transparent; border: none; color: #94a3b8; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 8px; border-radius: 8px; }
         .btn-icon.danger { color: #f87171; background: rgba(248, 113, 113, 0.1); }
+        .btn-icon.tip-close { padding: 4px; font-size: 16px; margin-right: -8px; }
 
         .full-width { width: 100%; }
         .mt-10 { margin-top: 10px; }
@@ -376,7 +383,7 @@ export default function Settings() {
         .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; }
 
         .provider-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-        .provider-opt { padding: 12px 8px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; color: #cbd5e1; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 14px; }
+        .provider-opt { padding: 12px 8px; background: #0f172a; border: 1px solid #334155; border-radius: 10px; color: #cbd5e1; font-weight: 600; cursor: pointer; transition: 0.2s; font-size: 14px; text-align: center; }
         .provider-opt.selected { background: #1e3a8a; border-color: #3b82f6; color: white; }
         .provider-opt.live-opt.selected { background: #064e3b; border-color: #10b981; color: white; }
 
@@ -386,10 +393,11 @@ export default function Settings() {
         .field input:focus { outline: none; border-color: #3b82f6; }
         
         .account-card { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: #0f172a; border: 1px solid #334155; border-radius: 12px; margin-bottom: 12px; }
-        .atype { font-size: 12px; padding: 4px 8px; border-radius: 6px; font-weight: bold; margin-bottom: 4px; display: inline-block; }
+        .account-info { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+        .atype { font-size: 12px; padding: 4px 8px; border-radius: 6px; font-weight: bold; display: inline-block; }
         .atype.live { background: #064e3b; color: #34d399; }
         .atype.demo { background: #1e3a8a; color: #60a5fa; }
-        .aname { font-size: 16px; font-weight: bold; color: white; }
+        .aname { font-size: 16px; font-weight: bold; color: white; margin: 0; }
 
         .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
         .modal { width: 100%; max-width: 400px; margin: 0; }
@@ -401,8 +409,8 @@ export default function Settings() {
 function Slider({ label, value, min, max, step = 1, onChange, desc }) {
   return (
     <div className="field" style={{ marginBottom: '24px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-        <label style={{ margin: 0 }}>{label}</label>
+      <div style={{ display: 'flex', justifyItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+        <label style={{ margin: 0, alignSelf: 'center' }}>{label}</label>
         <span style={{ background: '#3b82f6', color: 'white', padding: '2px 10px', borderRadius: '12px', fontSize: '14px', fontWeight: 'bold' }}>{value}</span>
       </div>
       <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(+e.target.value)} style={{ width: '100%', accentColor: '#3b82f6', cursor: 'pointer' }} />
