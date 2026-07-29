@@ -355,12 +355,13 @@ export default function Settings() {
         .tip-btn { display: inline-block; background: #3b82f6; color: white; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: bold; transition: 0.2s; }
         .tip-btn:hover { background: #2563eb; }
 
+        /* תפריט מוגדל לנוחות לחיצה */
         .menu-list { background: #1e293b; border-radius: 16px; border: 1px solid #334155; margin-bottom: 24px; overflow: hidden; }
-        .menu-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; text-decoration: none; color: #fff; font-weight: 600; font-size: 15px; border-bottom: 1px solid #334155; width: 100%; transition: background 0.2s; }
+        .menu-row { display: flex; justify-content: space-between; align-items: center; padding: 22px 20px; text-decoration: none; color: #fff; font-weight: 600; font-size: 17px; border-bottom: 1px solid #334155; width: 100%; transition: background 0.2s; }
         .menu-row:last-child { border-bottom: none; }
         .menu-row:hover { background: #334155; }
         .menu-row.danger { color: #f87171; }
-        .menu-icon { opacity: 0.7; font-size: 18px; }
+        .menu-icon { opacity: 0.8; font-size: 22px; }
         
         .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; font-size: 15px; font-weight: 600; border-radius: 10px; cursor: pointer; border: none; text-decoration: none; transition: 0.2s; }
         .btn:disabled { opacity: 0.5; }
