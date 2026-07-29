@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import Layout from '../components/Layout';
 import { useAppData } from '../lib/useAppData';
 import { useToast } from '../components/Toast';
@@ -16,6 +17,7 @@ export default function Settings() {
   const [showAccModal, setShowAccModal] = useState(false);
 
   const [saving, setSaving] = useState(false);
+  const [dismissTip, setDismissTip] = useState(false);
 
   useEffect(() => { if (data.guard) setGuardForm(data.guard); }, [data.guard]);
 
@@ -80,7 +82,56 @@ export default function Settings() {
       <section className="page">
         <div className="page-head"><div><h1>{t('settingsTitle')}</h1><p>{t('settingsSub')}</p></div></div>
 
-        <div className="panel">
+        <div className="profile-card">
+          <div className="profile-top">
+            <div className="profile-avatar">{(data.user?.email || '?')[0].toUpperCase()}</div>
+            <div className="profile-name-wrap">
+              <div className="profile-name">{data.user?.email}</div>
+              <span className="profile-badge">{data.profile?.isAdmin ? t('adminTitle') : t('accountLabel')}</span>
+            </div>
+          </div>
+          <div className="profile-stats">
+            <div className="profile-stat"><div className="profile-stat-num">{data.accounts.length}</div><div className="profile-stat-label">{t('tradingAccounts')}</div></div>
+            <div className="profile-stat"><div className="profile-stat-num">{data.trades.length}</div><div className="profile-stat-label">{t('trades')}</div></div>
+            <div className="profile-stat"><div className="profile-stat-num">{data.trades.length ? Math.round((data.trades.filter(tr => tr.pnl > 0).length / data.trades.length) * 100) : 0}%</div><div className="profile-stat-label">{t('winRate')}</div></div>
+          </div>
+        </div>
+
+        <div className="profile-shortcuts">
+          <a className="shortcut-card" href="#accounts-panel">
+            <span className="shortcut-icon">💼</span>
+            <div className="shortcut-title">{t('tradingAccounts')}</div>
+            <div className="shortcut-sub">{t('shortcutAccountsSub')}</div>
+          </a>
+          <Link className="shortcut-card" href="/assistant">
+            <span className="shortcut-icon">🤖</span>
+            <div className="shortcut-title">{t('assistantTitle')}</div>
+            <div className="shortcut-sub">{t('shortcutAssistantSub')}</div>
+          </Link>
+        </div>
+
+        {!dismissTip && (
+          <div className="tip-card">
+            <button className="tip-close" onClick={() => setDismissTip(true)} aria-label={t('cancel')}>✕</button>
+            <h3>{t('tipTitle')}</h3>
+            <p>{t('tipBody')}</p>
+            <Link href="/journal" className="tip-btn">‹ {t('journalTitle')}</Link>
+          </div>
+        )}
+
+        <div className="menu-list">
+          <a className="menu-row" href="#guard-panel"><span>{t('traderGuard')}</span><span className="menu-icon">⚙️</span></a>
+          <a className="menu-row" href="#datasource-panel"><span>{t('dataSource')}</span><span className="menu-icon">🔌</span></a>
+          <a className="menu-row" href="#push-panel"><span>{t('pushNotifications')}</span><span className="menu-icon">🔔</span></a>
+          <div className="menu-row" role="button" tabIndex={0} onClick={connectGoogle} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && connectGoogle()}>
+            <span>{t('connectGoogleBtn')}</span><span className="menu-icon">🔗</span>
+          </div>
+          <div className="menu-row danger" role="button" tabIndex={0} onClick={signOutNow} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && signOutNow()}>
+            <span>{t('signOut')}</span><span className="menu-icon">↪</span>
+          </div>
+        </div>
+
+        <div className="panel" id="push-panel">
           <h2 style={{ textAlign: 'end' }}>{t('pushNotifications')}</h2>
           <p className="hint" style={{ textAlign: 'end' }}>תקבל התראות Push כאשר מניה חמה (Heat ≥ 85) מופיעה בסורק — גם כשהאפליקציה סגורה, לאחר שהופעל בעמוד הסורק.</p>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
@@ -89,7 +140,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="panel">
+        <div className="panel" id="guard-panel">
           <h2 style={{ textAlign: 'end' }}>{t('traderGuard')}</h2>
           <p className="hint" style={{ textAlign: 'end' }}>הגדר את מגבלות ניהול הסיכון. תקבל התראות כשמגיעים לסף.</p>
           <Slider label={t('lossStreakLimit')} value={guardForm.loss_streak_limit} min={1} max={10}
@@ -110,7 +161,7 @@ export default function Settings() {
           </div>
         </div>
 
-        <div className="panel">
+        <div className="panel" id="accounts-panel">
           <h2 style={{ textAlign: 'end' }}>{t('tradingAccounts')}</h2>
           <p className="hint" style={{ textAlign: 'end' }}>כמה חשבונות (Live / Demo) — לכל אחד נתונים נפרדים בדשבורד וביומן.</p>
           {data.accounts.map((a) => (
@@ -128,7 +179,7 @@ export default function Settings() {
           <button className="btn btn-ghost" style={{ width: '100%', marginTop: 10, justifyContent: 'center' }} onClick={() => setShowAccModal(true)}>{t('addAccount')}</button>
         </div>
 
-        <div className="panel">
+        <div className="panel" id="datasource-panel">
           <h2 style={{ textAlign: 'end' }}>{t('dataSource')}</h2>
           <p className="hint muted" style={{ textAlign: 'end' }}>בחר את מקור הנתונים לסריקת מניות בזמן אמת.</p>
           <div className="provider-row">
@@ -162,14 +213,6 @@ export default function Settings() {
           <button className="btn btn-primary" style={{ marginTop: 14 }} onClick={saveGuard} disabled={saving}>{saving ? t('saving') : t('saveDataSource')}</button>
         </div>
 
-        <div className="panel">
-          <h2 style={{ textAlign: 'end' }}>{t('accountLabel')}</h2>
-          <p style={{ textAlign: 'end', color: 'var(--text-dim)' }}>{data.user?.email}</p>
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-            <button className="btn btn-ghost" onClick={connectGoogle}>{t('connectGoogleBtn')}</button>
-            <button className="btn btn-danger-outline" onClick={signOutNow}>{t('signOut')}</button>
-          </div>
-        </div>
       </section>
 
       {showAccModal && (
