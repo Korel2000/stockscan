@@ -8,13 +8,13 @@ export default function Layout({ children, activeAccountName, accountCount = 1, 
   const router = useRouter();
   const { t, lang, toggle } = useLanguage();
 
-  // בדיוק 5 פריטים קבועים לתפריט התחתון (הגדרות נמצא כבר בסרגל העליון)
+  // 5 פריטים קבועים לתפריט התחתון - הגדרות הועבר לכאן (אחרון = צד שמאל ב-RTL)
   const BOTTOM_NAV = [
     { href: '/dashboard', label: t('dashboard') || 'לוח בקרה', icon: '🏠' },
     { href: '/journal', label: t('journal') || 'יומן מסחר', icon: '📝' },
     { href: '/analytics', label: t('analytics') || 'אנליטיקס', icon: '📊' },
     { href: '/scanner', label: t('scanner') || 'סורק', icon: '⚡' },
-    { href: '/assistant', label: t('assistantTitle') || 'עוזר AI', icon: '🤖' }
+    { href: '/settings', label: t('settings') || 'הגדרות', icon: '⚙️' }
   ];
 
   async function signOut() {
@@ -31,9 +31,10 @@ export default function Layout({ children, activeAccountName, accountCount = 1, 
           <button onClick={toggle} className="btn-topbar">
             {lang === 'he' ? 'English' : 'עברית'}
           </button>
-          <Link href="/settings" passHref legacyBehavior>
-            <a className="btn-topbar settings-btn">
-              <span className="icon">⚙️</span>
+          {/* עוזר ה-AI הועבר לסרגל העליון במקום ההגדרות */}
+          <Link href="/assistant" passHref legacyBehavior>
+            <a className="btn-topbar settings-btn" title="עוזר AI">
+              <span className="icon">🤖</span>
             </a>
           </Link>
         </div>
@@ -44,7 +45,7 @@ export default function Layout({ children, activeAccountName, accountCount = 1, 
         {children}
       </div>
 
-      {/* תפריט ניווט תחתון למובייל - 5 פריטים קבועים בלבד */}
+      {/* תפריט ניווט תחתון למובייל - 5 פריטים קבועים */}
       <nav className="bottom-nav">
         <div className="nav-items-container">
           {BOTTOM_NAV.map((item) => {
@@ -63,7 +64,6 @@ export default function Layout({ children, activeAccountName, accountCount = 1, 
 
       <AssistantWidget />
 
-      {/* עיצוב גלובלי למניעת שבירות */}
       <style jsx global>{`
         body {
           background-color: #0f172a;
@@ -74,7 +74,6 @@ export default function Layout({ children, activeAccountName, accountCount = 1, 
         }
       `}</style>
       
-      {/* עיצוב ספציפי למעטפת ולתפריטים */}
       <style jsx>{`
         .app-container {
           display: flex;
@@ -136,7 +135,6 @@ export default function Layout({ children, activeAccountName, accountCount = 1, 
           padding-bottom: 90px; 
         }
 
-        /* עיצוב הבר התחתון */
         .bottom-nav {
           position: fixed;
           bottom: 0;
@@ -145,11 +143,10 @@ export default function Layout({ children, activeAccountName, accountCount = 1, 
           background-color: rgba(15, 23, 42, 0.95);
           backdrop-filter: blur(12px);
           border-top: 1px solid #1e293b;
-          padding: 8px 4px 24px 4px; /* הוספת ריווח בטוח למטה למכשירי סלולר */
+          padding: 8px 4px 24px 4px; 
           z-index: 50;
         }
 
-        /* רשת שמחלקת את המסך ל-5 חלקים בדיוק ללא גלילה */
         .nav-items-container {
           display: grid;
           grid-template-columns: repeat(5, 1fr);
@@ -158,7 +155,6 @@ export default function Layout({ children, activeAccountName, accountCount = 1, 
           gap: 2px;
         }
 
-        /* עיצוב הפריטים בתפריט: אייקון מעל, טקסט מתחת */
         .nav-item {
           display: flex;
           flex-direction: column;
@@ -170,7 +166,7 @@ export default function Layout({ children, activeAccountName, accountCount = 1, 
           text-decoration: none;
           border-radius: 12px;
           transition: all 0.2s ease;
-          overflow: hidden; /* מונע מטקסט ארוך לפרוץ החוצה */
+          overflow: hidden; 
         }
 
         .nav-icon {
@@ -179,7 +175,6 @@ export default function Layout({ children, activeAccountName, accountCount = 1, 
           transition: transform 0.2s;
         }
 
-        /* הבטחה שהטקסט לא נחתך אלא קטן ומתאים עצמו לשורה אחת */
         .nav-label {
           font-size: 11px;
           font-weight: 600;
@@ -189,7 +184,6 @@ export default function Layout({ children, activeAccountName, accountCount = 1, 
           max-width: 100%;
         }
 
-        /* מצב פעיל (העמוד הנוכחי) */
         .nav-item.active {
           color: #fff;
           background-color: #1e3a8a;
