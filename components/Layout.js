@@ -8,14 +8,13 @@ export default function Layout({ children, activeAccountName, accountCount = 1, 
   const router = useRouter();
   const { t, lang, toggle } = useLanguage();
 
-  const NAV = [
-    { href: '/dashboard', label: t('dashboard') || 'לוח בקרה' },
-    { href: '/journal', label: t('journal') || 'יומן מסחר' },
-    { href: '/analytics', label: t('analytics') || 'אנליטיקס' },
-    { href: '/scanner', label: t('scanner') || 'סורק' },
-    { href: '/assistant', label: t('assistantTitle') || 'עוזר AI' },
-    { href: '/settings', label: t('settings') || 'הגדרות' },
-    ...(isAdmin ? [{ href: '/admin', label: t('adminTitle') || 'ניהול משתמשים' }] : [])
+  // בדיוק 5 פריטים קבועים לתפריט התחתון (הגדרות נמצא כבר בסרגל העליון)
+  const BOTTOM_NAV = [
+    { href: '/dashboard', label: t('dashboard') || 'לוח בקרה', icon: '🏠' },
+    { href: '/journal', label: t('journal') || 'יומן מסחר', icon: '📝' },
+    { href: '/analytics', label: t('analytics') || 'אנליטיקס', icon: '📊' },
+    { href: '/scanner', label: t('scanner') || 'סורק', icon: '⚡' },
+    { href: '/assistant', label: t('assistantTitle') || 'עוזר AI', icon: '🤖' }
   ];
 
   async function signOut() {
@@ -34,27 +33,27 @@ export default function Layout({ children, activeAccountName, accountCount = 1, 
           </button>
           <Link href="/settings" passHref legacyBehavior>
             <a className="btn-topbar settings-btn">
-              <span className="icon">⚙️</span> הגדרות
+              <span className="icon">⚙️</span>
             </a>
           </Link>
         </div>
       </header>
 
-      {/* תוכן העמוד עצמו (כמו עמוד ההגדרות) */}
+      {/* תוכן העמוד עצמו */}
       <div className="main-content">
         {children}
       </div>
 
-      {/* תפריט ניווט תחתון למובייל */}
+      {/* תפריט ניווט תחתון למובייל - 5 פריטים קבועים בלבד */}
       <nav className="bottom-nav">
         <div className="nav-items-container">
-          {NAV.map((item) => {
-            // בדיקה אם העמוד הנוכחי פעיל כדי לצבוע אותו
+          {BOTTOM_NAV.map((item) => {
             const isActive = router.pathname.startsWith(item.href);
             return (
               <Link key={item.href} href={item.href} passHref legacyBehavior>
                 <a className={`nav-item ${isActive ? 'active' : ''}`}>
-                  <span>{item.label}</span>
+                  <span className="nav-icon">{item.icon}</span>
+                  <span className="nav-label">{item.label}</span>
                 </a>
               </Link>
             );
@@ -122,7 +121,7 @@ export default function Layout({ children, activeAccountName, accountCount = 1, 
           text-decoration: none;
           display: flex;
           align-items: center;
-          gap: 6px;
+          justify-content: center;
           font-weight: 500;
         }
 
@@ -134,56 +133,71 @@ export default function Layout({ children, activeAccountName, accountCount = 1, 
         .main-content {
           flex: 1;
           overflow-y: auto;
-          /* השארת מרווח למטה כדי שהתפריט התחתון לא יסתיר את התוכן */
           padding-bottom: 90px; 
         }
 
-        /* תפריט ניווט תחתון צף */
+        /* עיצוב הבר התחתון */
         .bottom-nav {
           position: fixed;
           bottom: 0;
           left: 0;
           right: 0;
           background-color: rgba(15, 23, 42, 0.95);
-          backdrop-filter: blur(10px);
+          backdrop-filter: blur(12px);
           border-top: 1px solid #1e293b;
-          padding: 10px 10px 24px 10px; /* ריווח תחתון מוגדל למכשירי אייפון/אנדרואיד חדשים */
+          padding: 8px 4px 24px 4px; /* הוספת ריווח בטוח למטה למכשירי סלולר */
           z-index: 50;
         }
 
+        /* רשת שמחלקת את המסך ל-5 חלקים בדיוק ללא גלילה */
         .nav-items-container {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
           max-width: 600px;
           margin: 0 auto;
-          overflow-x: auto; /* מאפשר גלילה אם יש יותר מדי פריטים */
-          gap: 4px;
+          gap: 2px;
         }
 
-        /* הסתרת פס הגלילה בתפריט התחתון */
-        .nav-items-container::-webkit-scrollbar {
-          display: none;
-        }
-
+        /* עיצוב הפריטים בתפריט: אייקון מעל, טקסט מתחת */
         .nav-item {
-          flex: 1;
-          text-align: center;
-          padding: 12px 10px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 4px;
+          padding: 10px 2px;
           color: #94a3b8;
           text-decoration: none;
-          font-size: 14px;
-          font-weight: 600;
           border-radius: 12px;
-          white-space: nowrap;
           transition: all 0.2s ease;
-          min-width: 70px;
+          overflow: hidden; /* מונע מטקסט ארוך לפרוץ החוצה */
         }
 
+        .nav-icon {
+          font-size: 22px;
+          line-height: 1;
+          transition: transform 0.2s;
+        }
+
+        /* הבטחה שהטקסט לא נחתך אלא קטן ומתאים עצמו לשורה אחת */
+        .nav-label {
+          font-size: 11px;
+          font-weight: 600;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          max-width: 100%;
+        }
+
+        /* מצב פעיל (העמוד הנוכחי) */
         .nav-item.active {
           color: #fff;
-          background-color: #1e3a8a; /* צבע כחול בולט לפריט הפעיל */
-          box-shadow: 0 4px 12px rgba(30, 58, 138, 0.5);
+          background-color: #1e3a8a;
+          box-shadow: 0 4px 12px rgba(30, 58, 138, 0.3);
+        }
+
+        .nav-item.active .nav-icon {
+          transform: translateY(-2px);
         }
       `}</style>
     </div>
