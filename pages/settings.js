@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
 import { useAppData } from '../lib/useAppData';
 import { useToast } from '../components/Toast';
+import { supabase } from '../lib/supabaseClient';
 import { useLanguage } from '../lib/i18n';
 
 export default function Settings() {
   const data = useAppData();
+  const router = useRouter();
   const { toast, ToastEl } = useToast();
   const { t } = useLanguage();
   const [guardForm, setGuardForm] = useState(null);
@@ -45,6 +48,23 @@ export default function Settings() {
     if (!window.confirm(t('confirmDeleteAccount'))) return;
     await data.apiFetch(`/api/accounts?id=${id}`, { method: 'DELETE' });
     await data.refreshAccounts();
+  }
+
+  async function connectGoogle() {
+    try {
+      const { error } = await supabase.auth.linkIdentity({
+        provider: 'google',
+        options: { redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/settings` : undefined }
+      });
+      if (error) throw error;
+    } catch (e) {
+      toast(e.message || t('connectError'));
+    }
+  }
+
+  async function signOutNow() {
+    await supabase.auth.signOut();
+    router.push('/login');
   }
 
   function sendTestNotif() {
@@ -145,6 +165,10 @@ export default function Settings() {
         <div className="panel">
           <h2 style={{ textAlign: 'end' }}>{t('accountLabel')}</h2>
           <p style={{ textAlign: 'end', color: 'var(--text-dim)' }}>{data.user?.email}</p>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+            <button className="btn btn-ghost" onClick={connectGoogle}>{t('connectGoogleBtn')}</button>
+            <button className="btn btn-danger-outline" onClick={signOutNow}>{t('signOut')}</button>
+          </div>
         </div>
       </section>
 
