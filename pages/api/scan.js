@@ -1,15 +1,11 @@
 export default async function handler(req, res) {
-  const apiKey = process.env.BENZINGA_API_KEY;
-
-  if (!apiKey) {
-    return res.status(500).json({ success: false, error: 'API key is missing in environment variables' });
-  }
+  const apiKey = process.env.ALPACA_API_KEY || process.env.BENZINGA_API_KEY;
 
   try {
     const response = await fetch(`https://api.benzinga.com/api/v2/news?token=${apiKey}&pageSize=50`);
     
     if (!response.ok) {
-      throw new Error(`Benzinga API error: ${response.statusText}`);
+      throw new Error(`API error: ${response.statusText}`);
     }
 
     const data = await response.json();
@@ -17,7 +13,7 @@ export default async function handler(req, res) {
 
     const stockMap = new Map();
 
-    articles.forEach((item, index) => {
+    articles.forEach((item) => {
       if (item.stocks && Array.isArray(item.stocks)) {
         item.stocks.forEach(stock => {
           const ticker = stock.name;
@@ -34,7 +30,7 @@ export default async function handler(req, res) {
               vol: `${(2.1 + (Math.abs(ticker.charCodeAt(0)) % 8)).toFixed(1)}M`,
               score: 50 + (Math.abs(ticker.charCodeAt(0)) % 45),
               newsTitle: item.title,
-              newsSource: `benzinga • ${new Date(item.updated || item.created).toLocaleTimeString()}`
+              newsSource: `market • ${new Date(item.updated || item.created).toLocaleTimeString()}`
             });
           }
         });
@@ -49,7 +45,7 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Scan API error:', error);
+    console.error('API error:', error);
     return res.status(500).json({
       success: false,
       error: error.message
