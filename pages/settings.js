@@ -94,6 +94,8 @@ export default function Settings() {
     }
   }
 
+  const isConnected = Boolean(data.user?.email);
+
   return (
     <Layout activeAccountName={data.activeAccount?.name} accountCount={data.accounts.length} isAdmin={data.profile?.isAdmin}>
       <section className="page modern-settings">
@@ -168,18 +170,25 @@ export default function Settings() {
           <a className="menu-row" href="#datasource-panel"><span>{t('dataSource')}</span><span className="menu-icon">🔌</span></a>
           <a className="menu-row" href="#push-panel"><span>{t('pushNotifications')}</span><span className="menu-icon">🔔</span></a>
           
-          {/* שורת חיבור ל-Google מעוצבת ומסודרת */}
-          <div className="menu-row google-row">
-            <div className="flex items-center gap-3">
-              <span className="menu-icon">🌐</span>
-              <div className="flex flex-col">
-                <span className="text-white font-medium">{t('connectGoogleBtn')}</span>
-                <span className="text-xs text-slate-400 font-normal">מחובר בהצלחה</span>
+          {/* שורת Google נקייה ומעוצבת */}
+          <div className="menu-row google-box">
+            <div className="google-info">
+              <span className="google-badge-icon">G</span>
+              <div className="google-text">
+                <span className="google-title">
+                  {isConnected ? 'מחובר באמצעות Google' : t('connectGoogleBtn')}
+                </span>
+                {isConnected && <span className="google-sub">{data.user?.email}</span>}
               </div>
             </div>
-            <button onClick={connectGoogle} className="btn-google-sync">
-              סנכרון מחדש
-            </button>
+
+            {!isConnected ? (
+              <button onClick={connectGoogle} className="google-action-btn">
+                התחבר
+              </button>
+            ) : (
+              <span className="google-status-check">✓</span>
+            )}
           </div>
 
           <button className="menu-row danger btn-reset" onClick={signOutNow}>
@@ -331,15 +340,7 @@ export default function Settings() {
         .page-head h1 { font-size: 28px; font-weight: 800; margin: 0 0 4px 0; color: #ffffff; }
         .subtitle { color: #94a3b8; font-size: 15px; margin: 0; }
 
-        .panel {
-          background: #1e293b;
-          border: 1px solid #334155;
-          border-radius: 16px;
-          padding: 20px;
-          margin-bottom: 20px;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
+        .panel { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
         .panel h2 { font-size: 18px; margin: 0 0 16px 0; color: #ffffff; border-bottom: 1px solid #334155; padding-bottom: 12px; }
         .hint { color: #94a3b8; font-size: 14px; margin-bottom: 20px; line-height: 1.4; }
 
@@ -367,17 +368,21 @@ export default function Settings() {
         .tip-btn { display: inline-block; background: #3b82f6; color: white; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: bold; transition: 0.2s; }
         .tip-btn:hover { background: #2563eb; }
 
-        /* תפריט מוגדל לנוחות לחיצה */
         .menu-list { background: #1e293b; border-radius: 16px; border: 1px solid #334155; margin-bottom: 24px; overflow: hidden; }
         .menu-row { display: flex; justify-content: space-between; align-items: center; padding: 22px 20px; text-decoration: none; color: #fff; font-weight: 600; font-size: 17px; border-bottom: 1px solid #334155; width: 100%; transition: background 0.2s; }
         .menu-row:last-child { border-bottom: none; }
-        .menu-row:hover { background: #334155; }
+        .menu-row:hover:not(.google-box) { background: #334155; }
         .menu-row.danger { color: #f87171; }
         .menu-icon { opacity: 0.8; font-size: 22px; }
 
-        .google-row { background: rgba(59, 130, 246, 0.05); }
-        .btn-google-sync { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .btn-google-sync:hover { background: rgba(59, 130, 246, 0.3); }
+        .google-box { background: rgba(59, 130, 246, 0.05); }
+        .google-info { display: flex; align-items: center; gap: 12px; }
+        .google-badge-icon { width: 32px; height: 32px; background: #ffffff; color: #4285f4; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 18px; font-family: sans-serif; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .google-text { display: flex; flex-direction: column; text-align: right; }
+        .google-title { color: #ffffff; font-weight: bold; font-size: 16px; }
+        .google-sub { font-size: 12px; color: #94a3b8; font-weight: normal; }
+        .google-action-btn { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: none; padding: 6px 14px; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; }
+        .google-status-check { width: 24px; height: 24px; background: #10b981; color: #ffffff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
         
         .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; font-size: 15px; font-weight: 600; border-radius: 10px; cursor: pointer; border: none; text-decoration: none; transition: 0.2s; }
         .btn:disabled { opacity: 0.5; }
