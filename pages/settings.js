@@ -1,4 +1,4 @@
-import { useEffect, useState, memo, useCallback, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Layout from '../components/Layout';
@@ -22,11 +22,6 @@ export default function Settings() {
   const [alpacaKey, setAlpacaKey] = useState('');
   const [alpacaSecret, setAlpacaSecret] = useState('');
 
-  // בדיקה האם המשתמש כבר מקושר לחשבון גוגל
-  const isGoogleConnected = useMemo(() => {
-    return data.user?.app_metadata?.providers?.includes('google') || false;
-  }, [data.user]);
-
   useEffect(() => { 
     if (data.guard) {
       setGuardForm(data.guard);
@@ -37,11 +32,6 @@ export default function Settings() {
       }
     } 
   }, [data.guard]);
-
-  // אופטימיזציה למהירות: מניעת יצירת פונקציות מחדש בכל רינדור
-  const handleGuardChange = useCallback((key, value) => {
-    setGuardForm(prev => ({ ...prev, [key]: value }));
-  }, []);
 
   if (!data.ready || !guardForm) return <Layout><div className="page" /></Layout>;
 
@@ -80,7 +70,6 @@ export default function Settings() {
   }
 
   async function connectGoogle() {
-    if (isGoogleConnected) return; // מניעת לחיצה כפולה אם כבר מחובר
     try {
       const { error } = await supabase.auth.linkIdentity({
         provider: 'google',
@@ -104,6 +93,9 @@ export default function Settings() {
       toast('יש להפעיל התראות בעמוד הסורק קודם לכן');
     }
   }
+
+  // בדיקה אם המשתמש מחובר (לפי קיום כתובת מייל)
+  const isConnected = !!data.user?.email;
 
   return (
     <Layout activeAccountName={data.activeAccount?.name} accountCount={data.accounts.length} isAdmin={data.profile?.isAdmin}>
@@ -179,35 +171,35 @@ export default function Settings() {
           <a className="menu-row" href="#datasource-panel"><span>{t('dataSource')}</span><span className="menu-icon">🔌</span></a>
           <a className="menu-row" href="#push-panel"><span>{t('pushNotifications')}</span><span className="menu-icon">🔔</span></a>
           
-          {/* אזור גוגל המשופר */}
-          <div className={`menu-row google-row ${isGoogleConnected ? 'connected' : ''}`}>
+          {/* כרטיסיית Google החדשה */}
+          <div className="menu-row" style={{ backgroundColor: isConnected ? 'rgba(16, 185, 129, 0.05)' : 'rgba(59, 130, 246, 0.05)', display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #334155' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span className="google-icon-wrapper">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <div style={{ background: 'white', borderRadius: '50%', padding: '6px', width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                   <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
                   <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
                   <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                 </svg>
-              </span>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ color: 'white', fontWeight: '600' }}>
-                  {isGoogleConnected ? 'מחובר באמצעות Google' : t('connectGoogleBtn')}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'right' }}>
+                <span style={{ color: 'white', fontWeight: 'bold' }}>
+                  {isConnected ? 'מחובר באמצעות Google' : t('connectGoogleBtn')}
                 </span>
-                {isGoogleConnected && <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: 'normal' }}>החיבור פעיל ומסונכרן</span>}
+                {isConnected && <span style={{ fontSize: '12px', color: '#94a3b8', fontWeight: 'normal' }}>{data.user?.email}</span>}
               </div>
             </div>
-            
-            {!isGoogleConnected ? (
-              <button onClick={connectGoogle} className="btn-google-sync">התחבר</button>
+
+            {!isConnected ? (
+              <button onClick={connectGoogle} style={{ background: 'rgba(59, 130, 246, 0.2)', color: '#60a5fa', border: 'none', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
+                התחבר
+              </button>
             ) : (
-              <span className="connected-badge">✓</span>
+              <button onClick={signOutNow} style={{ background: 'rgba(248, 113, 113, 0.1)', color: '#f87171', border: 'none', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
+                התנתק
+              </button>
             )}
           </div>
-
-          <button className="menu-row danger btn-reset" onClick={signOutNow}>
-            <span>{t('signOut')}</span><span className="menu-icon">↪</span>
-          </button>
         </nav>
 
         <div className="panel" id="push-panel">
@@ -226,10 +218,14 @@ export default function Settings() {
           <p className="hint">הגדר את מגבלות ניהול הסיכון שלך. המערכת תתריע כשתגיע לסף.</p>
           
           <div className="sliders-container">
-            <Slider label={t('lossStreakLimit')} fieldKey="loss_streak_limit" value={guardForm.loss_streak_limit} min={1} max={10} onChange={handleGuardChange} desc={t('lossStreakDesc')} />
-            <Slider label={t('maxTradesPerDay')} fieldKey="max_trades_per_day" value={guardForm.max_trades_per_day} min={1} max={30} onChange={handleGuardChange} desc={t('maxTradesDesc')} />
-            <Slider label={t('dailyLossLimit')} fieldKey="daily_loss_limit" value={guardForm.daily_loss_limit} min={10} max={2000} step={10} onChange={handleGuardChange} desc={t('dailyLossDesc')} />
-            <Slider label={t('dailyProfitTarget')} fieldKey="daily_profit_target" value={guardForm.daily_profit_target} min={10} max={5000} step={10} onChange={handleGuardChange} desc={t('dailyProfitDesc')} />
+            <Slider label={t('lossStreakLimit')} value={guardForm.loss_streak_limit} min={1} max={10}
+              onChange={(v) => setGuardForm({ ...guardForm, loss_streak_limit: v })} desc={t('lossStreakDesc')} />
+            <Slider label={t('maxTradesPerDay')} value={guardForm.max_trades_per_day} min={1} max={30}
+              onChange={(v) => setGuardForm({ ...guardForm, max_trades_per_day: v })} desc={t('maxTradesDesc')} />
+            <Slider label={t('dailyLossLimit')} value={guardForm.daily_loss_limit} min={10} max={2000} step={10}
+              onChange={(v) => setGuardForm({ ...guardForm, daily_loss_limit: v })} desc={t('dailyLossDesc')} />
+            <Slider label={t('dailyProfitTarget')} value={guardForm.daily_profit_target} min={10} max={5000} step={10}
+              onChange={(v) => setGuardForm({ ...guardForm, daily_profit_target: v })} desc={t('dailyProfitDesc')} />
           </div>
 
           <div className="panel-actions left mt-20">
@@ -271,7 +267,7 @@ export default function Settings() {
             {['ibkr', 'alpaca', 'demo'].map((p) => (
               <button key={p} 
                 className={`provider-opt ${guardForm.scanner_provider === p ? 'selected' : ''}`}
-                onClick={() => handleGuardChange('scanner_provider', p)}>
+                onClick={() => setGuardForm({ ...guardForm, scanner_provider: p })}>
                 {p === 'ibkr' ? 'IBKR' : p === 'alpaca' ? 'Alpaca' : t('demoLabel')}
               </button>
             ))}
@@ -294,7 +290,7 @@ export default function Settings() {
             <div className="api-fields mt-15">
               <div className="field">
                 <label>כתובת IB Gateway</label>
-                <input value={guardForm.ibkr_gateway_url || ''} onChange={(e) => handleGuardChange('ibkr_gateway_url', e.target.value)} placeholder="https://localhost:5000" dir="ltr" />
+                <input value={guardForm.ibkr_gateway_url || ''} onChange={(e) => setGuardForm({ ...guardForm, ibkr_gateway_url: e.target.value })} placeholder="https://localhost:5000" dir="ltr" />
               </div>
             </div>
           )}
@@ -381,16 +377,8 @@ export default function Settings() {
         .menu-list { background: #1e293b; border-radius: 16px; border: 1px solid #334155; margin-bottom: 24px; overflow: hidden; }
         .menu-row { display: flex; justify-content: space-between; align-items: center; padding: 22px 20px; text-decoration: none; color: #fff; font-weight: 600; font-size: 17px; border-bottom: 1px solid #334155; width: 100%; transition: background 0.2s; }
         .menu-row:last-child { border-bottom: none; }
-        .menu-row:hover:not(.google-row) { background: #334155; }
-        .menu-row.danger { color: #f87171; }
+        .menu-row:hover { background: #334155; }
         .menu-icon { opacity: 0.8; font-size: 22px; }
-
-        .google-row { background: rgba(59, 130, 246, 0.05); }
-        .google-row.connected { background: rgba(16, 185, 129, 0.05); border-bottom: 1px solid #334155; }
-        .google-icon-wrapper { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: white; border-radius: 50%; padding: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .btn-google-sync { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .btn-google-sync:hover { background: rgba(59, 130, 246, 0.3); }
-        .connected-badge { display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; background: #10b981; color: white; border-radius: 50%; font-size: 14px; font-weight: bold; }
         
         .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; font-size: 15px; font-weight: 600; border-radius: 10px; cursor: pointer; border: none; text-decoration: none; transition: 0.2s; }
         .btn:disabled { opacity: 0.5; }
@@ -399,7 +387,6 @@ export default function Settings() {
         .btn-secondary { background: #334155; color: white; }
         .btn-outline { background: transparent; border: 1px solid #475569; color: #cbd5e1; }
         .btn-ghost { background: transparent; color: #94a3b8; }
-        .btn-reset { background: none; border: none; padding: 0; font: inherit; cursor: pointer; text-align: inherit; }
         
         .btn-icon { background: transparent; border: none; color: #94a3b8; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 8px; border-radius: 8px; }
         .btn-icon.danger { color: #f87171; background: rgba(248, 113, 113, 0.1); }
@@ -436,16 +423,15 @@ export default function Settings() {
   );
 }
 
-// אופטימיזציה לסליידרים כדי שלא ירונדרו סתם מחדש בעת גלילה
-const Slider = memo(function Slider({ label, fieldKey, value, min, max, step = 1, onChange, desc }) {
+function Slider({ label, value, min, max, step = 1, onChange, desc }) {
   return (
     <div className="field" style={{ marginBottom: '24px' }}>
       <div style={{ display: 'flex', justifyItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
         <label style={{ margin: 0, alignSelf: 'center' }}>{label}</label>
         <span style={{ background: '#3b82f6', color: 'white', padding: '2px 10px', borderRadius: '12px', fontSize: '14px', fontWeight: 'bold' }}>{value}</span>
       </div>
-      <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(fieldKey, +e.target.value)} style={{ width: '100%', accentColor: '#3b82f6', cursor: 'pointer' }} />
+      <input type="range" min={min} max={max} step={step} value={value} onChange={(e) => onChange(+e.target.value)} style={{ width: '100%', accentColor: '#3b82f6', cursor: 'pointer' }} />
       <p style={{ fontSize: '13px', color: '#94a3b8', margin: '8px 0 0 0' }}>{desc}</p>
     </div>
   );
-});
+}
