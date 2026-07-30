@@ -167,9 +167,21 @@ export default function Settings() {
           <a className="menu-row" href="#guard-panel"><span>{t('traderGuard')}</span><span className="menu-icon">⚙️</span></a>
           <a className="menu-row" href="#datasource-panel"><span>{t('dataSource')}</span><span className="menu-icon">🔌</span></a>
           <a className="menu-row" href="#push-panel"><span>{t('pushNotifications')}</span><span className="menu-icon">🔔</span></a>
-          <button className="menu-row btn-reset" onClick={connectGoogle}>
-            <span>{t('connectGoogleBtn')}</span><span className="menu-icon">🔗</span>
-          </button>
+          
+          {/* שורת חיבור ל-Google מעוצבת ומסודרת */}
+          <div className="menu-row google-row">
+            <div className="flex items-center gap-3">
+              <span className="menu-icon">🌐</span>
+              <div className="flex flex-col">
+                <span className="text-white font-medium">{t('connectGoogleBtn')}</span>
+                <span className="text-xs text-slate-400 font-normal">מחובר בהצלחה</span>
+              </div>
+            </div>
+            <button onClick={connectGoogle} className="btn-google-sync">
+              סנכרון מחדש
+            </button>
+          </div>
+
           <button className="menu-row danger btn-reset" onClick={signOutNow}>
             <span>{t('signOut')}</span><span className="menu-icon">↪</span>
           </button>
@@ -362,6 +374,10 @@ export default function Settings() {
         .menu-row:hover { background: #334155; }
         .menu-row.danger { color: #f87171; }
         .menu-icon { opacity: 0.8; font-size: 22px; }
+
+        .google-row { background: rgba(59, 130, 246, 0.05); }
+        .btn-google-sync { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .btn-google-sync:hover { background: rgba(59, 130, 246, 0.3); }
         
         .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; font-size: 15px; font-weight: 600; border-radius: 10px; cursor: pointer; border: none; text-decoration: none; transition: 0.2s; }
         .btn:disabled { opacity: 0.5; }
