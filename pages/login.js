@@ -3,103 +3,232 @@ import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
 import { useLanguage } from '../lib/i18n';
 
-const OAUTH_PROVIDERS = [
-  { id: 'google', label: 'Google', color: '#fff', bg: '#fff', textColor: '#111' }
-];
-
 export default function Login() {
   const { t, lang, toggle } = useLanguage();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [mode, setMode] = useState('signin');
+  const [agreed, setAgreed] = useState(false);
   const [err, setErr] = useState('');
-  const [busy, setBusy] = useState(false);
   const router = useRouter();
 
-  async function submit(e) {
-    e.preventDefault();
-    setErr(''); setBusy(true);
-    try {
-      if (mode === 'signin') {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.auth.signUp({ email, password });
-        if (error) throw error;
-      }
-      router.push('/dashboard');
-    } catch (e) {
-      setErr(e.message);
-    } finally {
-      setBusy(false);
-    }
-  }
-
+  // התחברות עם OAuth (Apple / Google)
   async function signInWithOAuth(provider) {
+    if (!agreed) {
+      setErr('יש לאשר את תנאי השימוש ומדיניות הפרטיות כדי להמשיך.');
+      return;
+    }
     setErr('');
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/dashboard` : undefined }
+      options: { 
+        redirectTo: typeof window !== 'undefined' ? `${window.location.origin}/dashboard` : undefined 
+      }
     });
     if (error) setErr(error.message);
   }
 
+  // התחברות עם מספר טלפון (SMS)
+  async function handlePhoneSignIn() {
+    if (!agreed) {
+      setErr('יש לאשר את תנאי השימוש ומדיניות הפרטיות כדי להמשיך.');
+      return;
+    }
+    router.push('/login-phone');
+  }
+
+  // המשך ללא חשבון (אורח)
+  function handleGuestContinue() {
+    router.push('/dashboard');
+  }
+
   return (
-    <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-      <div style={{ width: '100%', maxWidth: 420 }}>
-        <div style={{ textAlign: 'center', marginBottom: 20 }}>
-          <button onClick={toggle} className="btn btn-ghost" style={{ fontSize: 12, padding: '6px 12px' }}>
-            {lang === 'he' ? 'English' : 'עברית'}
+    <div 
+      dir="rtl"
+      style={{ 
+        minHeight: '100dvh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        padding: 20,
+        backgroundColor: '#eef4ff',
+        fontFamily: 'system-ui, -apple-system, sans-serif'
+      }}
+    >
+      {/* כפתור החלפת שפה (פינה עליונה) */}
+      <div style={{ position: 'absolute', top: 20, left: 20 }}>
+        <button 
+          onClick={toggle} 
+          style={{ 
+            background: 'transparent', 
+            border: 'none', 
+            cursor: 'pointer', 
+            fontSize: 14, 
+            color: '#666' 
+          }}
+        >
+          {lang === 'he' ? 'English' : 'עברית'}
+        </button>
+      </div>
+
+      {/* כרטיס ההתחברות המרכזי */}
+      <div 
+        style={{ 
+          width: '100%', 
+          maxWidth: 400, 
+          backgroundColor: '#ffffff', 
+          borderRadius: 24, 
+          padding: '36px 28px',
+          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.05)',
+          textAlign: 'center'
+        }}
+      >
+        {/* לוגו אייקון + כותרת מותג */}
+        <div 
+          style={{ 
+            width: 52, 
+            height: 52, 
+            borderRadius: 16, 
+            backgroundColor: '#2563eb', 
+            color: '#fff', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            fontSize: 24, 
+            fontWeight: 'bold',
+            margin: '0 auto 12px' 
+          }}
+        >
+          S
+        </div>
+
+        <h1 style={{ fontSize: 26, fontWeight: 700, color: '#2563eb', margin: '0 0 4px 0' }}>
+          StockScan
+        </h1>
+        
+        {/* תת כותרת מתאימה למוצר שלך */}
+        <p style={{ fontSize: 14, color: '#6b7280', margin: '0 0 20px 0', lineHeight: 1.5 }}>
+          יומן מסחר חכם · התחבר כדי להמשיך לסחור ולסנכרן את הנתונים שלך בכל המכשירים.
+        </p>
+
+        {/* אישור תנאי שימוש */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 20 }}>
+          <input 
+            type="checkbox" 
+            id="terms" 
+            checked={agreed}
+            onChange={(e) => setAgreed(e.target.checked)}
+            style={{ width: 18, height: 18, cursor: 'pointer', accentColor: '#2563eb' }}
+          />
+          <label htmlFor="terms" style={{ fontSize: 13, color: '#374151', cursor: 'pointer' }}>
+            אני מסכים/ה ל<a href="/terms" style={{ color: '#2563eb', textDecoration: 'none', fontWeight: 500 }}>תנאי השימוש</a> ול<a href="/privacy" style={{ color: '#2563eb', textDecoration: 'none', fontWeight: 500 }}>מדיניות הפרטיות</a>
+          </label>
+        </div>
+
+        {/* הודעת שגיאה */}
+        {err && <p style={{ color: '#dc2626', fontSize: 13, marginBottom: 12 }}>{err}</p>}
+
+        {/* כפתורי התחברות מהירה */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {/* כפתור Apple */}
+          <button
+            type="button"
+            onClick={() => signInWithOAuth('apple')}
+            style={{
+              width: '100%',
+              padding: '14px',
+              borderRadius: 12,
+              backgroundColor: '#000000',
+              color: '#ffffff',
+              border: 'none',
+              fontSize: 15,
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8
+            }}
+          >
+            <span>🍎</span> התחברות באמצעות Apple
+          </button>
+
+          {/* כפתור Google */}
+          <button
+            type="button"
+            onClick={() => signInWithOAuth('google')}
+            style={{
+              width: '100%',
+              padding: '14px',
+              borderRadius: 12,
+              backgroundColor: '#ffffff',
+              color: '#374151',
+              border: '1px solid #e5e7eb',
+              fontSize: 15,
+              fontWeight: 500,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8
+            }}
+          >
+            <span>Google</span> התחבר עם Google
           </button>
         </div>
-        <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <div className="logo" style={{ width: 56, height: 56, borderRadius: 16, margin: '0 auto 14px', fontSize: 24 }}>S</div>
-          <h1 style={{ color: 'var(--blue)', fontSize: 26, margin: '0 0 4px' }}>StockScan</h1>
-          <p style={{ color: 'var(--text-dim)', margin: 0 }}>{t('tagline')}</p>
-        </div>
-        <div className="panel">
-          <h2 style={{ textAlign: 'center', fontSize: 22 }}>{mode === 'signin' ? t('signInTitle') : t('signUpTitle')}</h2>
-          <p className="hint muted" style={{ textAlign: 'center' }}>
-            {mode === 'signin' ? t('signInSub') : t('signUpSub')}
-          </p>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 18 }}>
-            {OAUTH_PROVIDERS.map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => signInWithOAuth(p.id)}
-                className="btn"
-                style={{ width: '100%', justifyContent: 'center', background: p.bg, color: p.textColor, border: '1px solid var(--border)' }}
-              >
-                {p.label} · {t('signIn')}
-              </button>
-            ))}
-          </div>
-          <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-faint)', margin: '0 0 14px' }}>{t('orContinueWith')}</p>
-
-          <form onSubmit={submit}>
-            <div className="field">
-              <label>{t('email')}</label>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="trader@example.com" required />
-            </div>
-            <div className="field">
-              <label>{t('password')}</label>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} />
-            </div>
-            {err && <p style={{ color: 'var(--red)', fontSize: 13, marginTop: -8 }}>{err}</p>}
-            <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', marginTop: 6 }} disabled={busy}>
-              {busy ? '...' : mode === 'signin' ? t('signIn') : t('signUp')}
-            </button>
-          </form>
-          <p style={{ textAlign: 'center', marginTop: 16, fontSize: 13, color: 'var(--text-dim)' }}>
-            {mode === 'signin' ? (
-              <>{t('noAccount')} <a style={{ color: 'var(--blue)', cursor: 'pointer' }} onClick={() => setMode('signup')}>{t('signUp')}</a></>
-            ) : (
-              <>{t('haveAccount')} <a style={{ color: 'var(--blue)', cursor: 'pointer' }} onClick={() => setMode('signin')}>{t('signIn')}</a></>
-            )}
-          </p>
+        {/* מפריד "או" */}
+        <div style={{ display: 'flex', alignItems: 'center', margin: '20px 0' }}>
+          <div style={{ flex: 1, height: 1, backgroundColor: '#f3f4f6' }}></div>
+          <span style={{ padding: '0 12px', fontSize: 12, color: '#9ca3af' }}>או</span>
+          <div style={{ flex: 1, height: 1, backgroundColor: '#f3f4f6' }}></div>
         </div>
+
+        {/* כפתור טלפון (SMS) */}
+        <button
+          type="button"
+          onClick={handlePhoneSignIn}
+          style={{
+            width: '100%',
+            padding: '14px',
+            borderRadius: 12,
+            backgroundColor: '#ffffff',
+            color: '#4b5563',
+            border: '1px solid #e5e7eb',
+            fontSize: 15,
+            fontWeight: 500,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            marginBottom: 20
+          }}
+        >
+          <span>📱</span> כניסה עם מספר טלפון (SMS)
+        </button>
+
+        {/* קישור המשך ללא חשבון */}
+        <button
+          type="button"
+          onClick={handleGuestContinue}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#2563eb',
+            fontSize: 14,
+            fontWeight: 600,
+            cursor: 'pointer',
+            marginBottom: 20,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 4
+          }}
+        >
+          ← המשך ללא חשבון
+        </button>
+
+        {/* תרצה להוסיף כאן טקסט תחתון מותאם אישית? */}
+        <p style={{ fontSize: 13, color: '#6b7280', margin: 0 }}>
+          משתמשים חדשים מקבלים <strong style={{ color: '#2563eb' }}>ניתוחי שוק בחינם</strong>.
+        </p>
       </div>
     </div>
   );
