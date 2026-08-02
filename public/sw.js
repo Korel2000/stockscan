@@ -31,6 +31,19 @@ self.addEventListener('push', (e) => {
 });
 
 self.addEventListener('notificationclick', (e) => {
+  const targetUrl = e.notification.data || '/scanner';
   e.notification.close();
-  e.waitUntil(clients.openWindow(e.notification.data || '/scanner'));
+  e.waitUntil(
+    (async () => {
+      const allClients = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+      for (const client of allClients) {
+        if (client.url.includes(self.location.origin)) {
+          await client.focus();
+          if ('navigate' in client) client.navigate(targetUrl);
+          return;
+        }
+      }
+      await clients.openWindow(targetUrl);
+    })()
+  );
 });
