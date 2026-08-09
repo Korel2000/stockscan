@@ -47,7 +47,7 @@ export default function Login() {
         <button onClick={toggle} className="btn btn-ghost" style={{ position: 'absolute', insetInlineStart: 0, top: 0 }}>
           {lang === 'he' ? 'English' : 'עברית'}
         </button>
-        <div style={{ width: 52, height: 52, borderRadius: 16, background: 'linear-gradient(135deg, var(--blue), var(--blue-2))', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, fontWeight: 800, margin: '0 auto 12px' }}>S</div>
+        <div style={{ width: 52, height: 52, borderRadius: 16, background: 'linear-gradient(135deg, var(--red), var(--green))', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, fontWeight: 800, margin: '0 auto 12px' }}>S</div>
         <h1 style={{ fontSize: 26, fontWeight: 800, color: 'var(--blue)', margin: '0 0 4px' }}>StockScan</h1>
         <p className="hint muted" style={{ margin: 0 }}>{t('tagline')}</p>
       </div>
