@@ -20,6 +20,7 @@ export default function Scanner() {
   const [provider, setProvider] = useState('demo');
   const [search, setSearch] = useState('');
   const [lastScan, setLastScan] = useState('');
+  const [scanning, setScanning] = useState(false);
   const [dismissDisclaimer, setDismissDisclaimer] = useState(false);
   const [pushStatus, setPushStatus] = useState('unknown');
   const [selectedSymbol, setSelectedSymbol] = useState(null);
@@ -27,6 +28,7 @@ export default function Scanner() {
   const seenHotRef = useRef(new Set());
 
   async function runScan() {
+    setScanning(true);
     try {
       const res = await data.apiFetch('/api/scan-preview');
       setResults(res.results);
@@ -46,7 +48,10 @@ export default function Scanner() {
         }
         seenHotRef.current = currentHot;
       }
-    } catch (e) { /* silent - keep last results */ }
+    } catch (e) { /* silent - keep last results */
+    } finally {
+      setScanning(false);
+    }
   }
 
   useEffect(() => {
@@ -97,7 +102,9 @@ export default function Scanner() {
         )}
 
         <div className="scanner-bar">
-          <button className="btn btn-ghost" onClick={runScan}>{t('scan')}</button>
+          <button className={`btn btn-ghost ${scanning ? 'btn-scanning' : ''}`} onClick={runScan} disabled={scanning}>
+            {scanning ? `⏳ ${t('scan')}...` : t('scan')}
+          </button>
           <span className="account-pill" style={{ color: 'var(--green)', borderColor: 'rgba(34,197,94,.3)' }}>{t('liveLabel')}</span>
           {pushStatus !== 'enabled' && (
             <button className="btn btn-primary" onClick={enablePush}>{t('enablePush')}</button>
