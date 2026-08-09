@@ -1,5 +1,9 @@
 {
   "crons": [
     { "path": "/api/scan?secret=REPLACE_WITH_YOUR_CRON_SECRET", "schedule": "0 13 * * *" }
-  ]
+  ],
+  "functions": {
+    "pages/api/assistant.js": { "maxDuration": 30 },
+    "pages/api/fundamentals.js": { "maxDuration": 20 }
+  }
 }
