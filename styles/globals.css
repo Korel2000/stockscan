@@ -474,4 +474,12 @@ button, .del, .chat-close, .provider-opt { min-height: 32px; }
 .menu-row.danger { color: var(--red); }
 .menu-icon { font-size: 16px; opacity: .85; }
 
+/* ---------- Fundamentals + AI summary (quote modal) ---------- */
+.fundamentals-box { border-top: 1px solid var(--border); margin-top: 16px; padding-top: 16px; }
+.fundamentals-box h3 { margin: 0 0 8px; font-size: 15px; font-weight: 800; }
+.fundamentals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.fundamentals-cell { display: flex; justify-content: space-between; background: var(--bg-elev); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; font-size: 12.5px; }
+.fundamentals-cell span { color: var(--text-faint); }
+.ai-summary-box { background: rgba(59,130,246,.08); border: 1px solid rgba(59,130,246,.25); border-radius: var(--radius-sm); padding: 14px; margin-top: 12px; font-size: 13px; line-height: 1.7; white-space: pre-wrap; }
+
 
