@@ -58,7 +58,7 @@ input[type="text"], input[type="email"], input[type="password"], input[type="num
 }
 .brand .logo {
   width: 34px; height: 34px; border-radius: 10px;
-  background: linear-gradient(135deg, var(--blue), var(--blue-2));
+  background: linear-gradient(135deg, var(--red), var(--green));
   display: flex; align-items: center; justify-content: center;
   font-weight: 800; color: #fff; font-size: 15px;
 }
@@ -368,6 +368,7 @@ input[type="text"], input[type="email"], input[type="password"], input[type="num
 }
 @media (max-width: 420px) {
   .nav-item { font-size: 10px; min-height: 50px; }
+  .scanner-bar .btn { flex: 1 1 auto; justify-content: center; min-width: 120px; }
 }
 
 /* ---------- Assistant full page ---------- */
@@ -388,6 +389,10 @@ a:focus-visible, button:focus-visible, input:focus-visible, .del:focus-visible,
 }
 button, .del, .chat-close, .provider-opt { min-height: 32px; }
 .btn { min-height: 40px; }
+.btn:active { transform: scale(.96); filter: brightness(.88); }
+.btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+.btn-scanning { animation: btnPulse 1s ease-in-out infinite; }
+@keyframes btnPulse { 0%, 100% { opacity: 1; } 50% { opacity: .6; } }
 .field label { display: block; margin-bottom: 6px; }
 
 /* ---------- Landing page ---------- */
