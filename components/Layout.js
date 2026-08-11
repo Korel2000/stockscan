@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
 import { useLanguage } from '../lib/i18n';
-import AssistantWidget from './AssistantWidget';
 
 export default function Layout({ children, activeAccountName, accountCount = 1, isAdmin = false }) {
   const router = useRouter();
@@ -31,12 +30,6 @@ export default function Layout({ children, activeAccountName, accountCount = 1, 
           <button onClick={toggle} className="btn-topbar">
             {lang === 'he' ? 'English' : 'עברית'}
           </button>
-          {/* עוזר ה-AI הועבר לסרגל העליון במקום ההגדרות */}
-          <Link href="/assistant" passHref legacyBehavior>
-            <a className="btn-topbar settings-btn" title="עוזר AI">
-              <span className="icon">🤖</span>
-            </a>
-          </Link>
           {isAdmin && (
             <Link href="/admin" passHref legacyBehavior>
               <a className="btn-topbar settings-btn" title="ניהול משתמשים">
@@ -68,8 +61,6 @@ export default function Layout({ children, activeAccountName, accountCount = 1, 
           })}
         </div>
       </nav>
-
-      <AssistantWidget />
 
       <style jsx global>{`
         body {
