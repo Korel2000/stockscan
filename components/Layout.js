@@ -37,6 +37,13 @@ export default function Layout({ children, activeAccountName, accountCount = 1, 
               <span className="icon">🤖</span>
             </a>
           </Link>
+          {isAdmin && (
+            <Link href="/admin" passHref legacyBehavior>
+              <a className="btn-topbar settings-btn" title="ניהול משתמשים">
+                <span className="icon">👥</span>
+              </a>
+            </Link>
+          )}
         </div>
       </header>
 
