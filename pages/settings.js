@@ -137,17 +137,10 @@ export default function Settings() {
 
         <div className="profile-shortcuts">
           <Link href="#accounts-panel" passHref legacyBehavior>
-            <a className="shortcut-card">
+            <a className="shortcut-card" style={{ gridColumn: '1 / -1' }}>
               <span className="shortcut-icon">💼</span>
               <div className="shortcut-title">{t('tradingAccounts')}</div>
               <div className="shortcut-sub">{t('shortcutAccountsSub')}</div>
-            </a>
-          </Link>
-          <Link href="/assistant" passHref legacyBehavior>
-            <a className="shortcut-card">
-              <span className="shortcut-icon">🤖</span>
-              <div className="shortcut-title">{t('assistantTitle')}</div>
-              <div className="shortcut-sub">{t('shortcutAssistantSub')}</div>
             </a>
           </Link>
         </div>
@@ -202,7 +195,7 @@ export default function Settings() {
           <div className="panel-actions left">
             <button className="btn btn-secondary" onClick={sendTestNotif}>{t('sendTest')}</button>
             <Link href="/scanner" passHref legacyBehavior>
-              <a className="btn btn-primary">להפעלה בסורק ←</a>
+              <a className="btn btn-primary">להפעלה בסורל ←</a>
             </Link>
           </div>
         </div>
