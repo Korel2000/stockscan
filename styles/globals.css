@@ -488,3 +488,25 @@ button, .del, .chat-close, .provider-opt { min-height: 32px; }
 .ai-summary-box { background: rgba(59,130,246,.08); border: 1px solid rgba(59,130,246,.25); border-radius: var(--radius-sm); padding: 14px; margin-top: 12px; font-size: 13px; line-height: 1.7; white-space: pre-wrap; }
 
 
+
+/* ---------- Motion & effects ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .page { animation: pageFadeIn .35s ease; }
+  @keyframes pageFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  .stat-card, .panel, .trade-row, .stock-row, .shortcut-card, .landing-feat-card, .fundamentals-cell, .criteria-pill {
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+  .stat-card:hover, .shortcut-card:hover, .landing-feat-card:hover {
+    transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,0,0,.35);
+  }
+  .trade-row:hover, .stock-row:hover { border-color: var(--blue); }
+  .menu-row { transition: background .15s ease; }
+  .modal { animation: modalPop .2s ease; }
+  @keyframes modalPop { from { opacity: 0; transform: scale(.97); } to { opacity: 1; transform: scale(1); } }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+/* ---------- Perceived performance: avoid rendering off-screen rows until needed ---------- */
+.trade-row, .stock-row { content-visibility: auto; contain-intrinsic-size: 0 60px; }
